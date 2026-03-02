@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>屎记期刊 | SHIT JOURNAL</title>
+<!-- 保留你原有的样式文件，保证风格统一 -->
 <link rel="stylesheet" href="style.css">
 <style>
-  /* 登录/注册弹窗样式 */
+  /* 仅添加登录弹窗样式，不修改全局样式，保证和其他页面一致 */
   .auth-modal {
     display: none;
     position: fixed;
@@ -25,6 +26,15 @@
     border-radius: 8px;
     width: 350px;
     text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  }
+  .auth-form .close-btn {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
+    color: #666;
+    margin-top: -10px;
+    margin-right: -10px;
   }
   .auth-form input {
     width: 100%;
@@ -32,6 +42,7 @@
     margin: 10px 0;
     border: 1px solid #eee;
     border-radius: 4px;
+    box-sizing: border-box;
   }
   .auth-form button {
     width: 100%;
@@ -42,14 +53,6 @@
     border-radius: 4px;
     cursor: pointer;
     margin-top: 10px;
-  }
-  .auth-form button:hover {
-    background: #333;
-  }
-  .close-btn {
-    float: right;
-    cursor: pointer;
-    font-size: 20px;
   }
   .tab-btn {
     display: inline-block;
@@ -64,7 +67,7 @@
   #registerForm {
     display: none;
   }
-  /* 登录容器固定在右上角 */
+  /* 登录容器样式（和你原有页面布局匹配） */
   #auth-container {
     position: absolute;
     top: 20px;
@@ -74,23 +77,16 @@
     align-items: center;
     gap: 10px;
   }
-  /* 后台入口样式 */
   #admin-entrance {
     display: none;
     color: #000;
     text-decoration: none;
     font-size: 14px;
     font-weight: bold;
-    padding: 5px 10px;
   }
-  #admin-entrance:hover {
-    text-decoration: underline;
-  }
-  /* 导航链接控制：未登录隐藏投稿 */
   #submit-link {
     display: none;
   }
-  /* 页面头部预留登录空间 */
   .header {
     position: relative;
     padding-top: 60px;
@@ -101,34 +97,34 @@
 <!-- 登录/注册弹窗 -->
 <div class="auth-modal" id="authModal">
   <div class="auth-form">
-    <span class="close-btn" onclick="closeAuth()">&times;</span>
-    <!-- 登录/注册标签切换 -->
+    <span class="close-btn" onclick="closeAuth(event)">&times;</span>
     <div>
-      <span class="tab-btn active" onclick="showLogin()">登录</span>
-      <span class="tab-btn" onclick="showRegister()">注册</span>
+      <span class="tab-btn active" onclick="showLogin(event)">登录</span>
+      <span class="tab-btn" onclick="showRegister(event)">注册</span>
     </div>
     <!-- 登录表单 -->
     <div id="loginForm">
-      <input type="text" id="loginUser" placeholder="请输入用户名" required>
-      <input type="password" id="loginPwd" placeholder="请输入密码" required>
-      <button onclick="doLogin()">登录</button>
+      <input type="text" id="loginUser" placeholder="请输入用户名">
+      <input type="password" id="loginPwd" placeholder="请输入密码">
+      <!-- 核心：type="button" + onclick阻止冒泡 -->
+      <button type="button" onclick="doLogin(event)">登录</button>
     </div>
     <!-- 注册表单 -->
     <div id="registerForm">
-      <input type="text" id="regUser" placeholder="请设置用户名" required>
-      <input type="password" id="regPwd" placeholder="请设置密码" required>
-      <input type="password" id="regPwd2" placeholder="请确认密码" required>
-      <button onclick="doRegister()">注册</button>
+      <input type="text" id="regUser" placeholder="请设置用户名">
+      <input type="password" id="regPwd" placeholder="请设置密码">
+      <input type="password" id="regPwd2" placeholder="请确认密码">
+      <button type="button" onclick="doRegister(event)">注册</button>
     </div>
   </div>
 </div>
 
-<!-- 顶部标题区 + 右上角登录 -->
+<!-- 原有页面结构（完全保留，保证风格统一） -->
 <header class="header">
   <div id="auth-container">
-    <span id="loginBtn" style="color: #000; text-decoration: underline; font-size:14px; cursor:pointer;">登录/注册</span>
+    <span id="loginBtn" style="cursor:pointer; text-decoration:underline; font-size:14px;">登录/注册</span>
     <span id="userName" style="display:none; font-size:14px;"></span>
-    <span id="logoutBtn" style="display:none; color: #000; text-decoration: underline; font-size:14px; cursor:pointer; margin-left:10px;">退出</span>
+    <span id="logoutBtn" style="display:none; cursor:pointer; text-decoration:underline; font-size:14px; margin-left:10px;">退出</span>
     <a href="admin.html" id="admin-entrance">后台</a>
   </div>
 
@@ -136,7 +132,6 @@
   <p class="slogan">Truth Fades, S.H.I.T Lasts. 真理会过时，构石永恒。</p>
 </header>
 
-<!-- 导航栏 -->
 <nav class="nav">
   <a href="index.html">HOME 主页</a>
   <a href="submit.html" id="submit-link">SUBMIT 投稿</a>
@@ -145,7 +140,6 @@
   <a href="contact.html">CONTACT US 联系我们</a>
 </nav>
 
-<!-- 核心内容区 -->
 <main class="content">
   <section class="section">
     <h2>RESEARCH ARTICLES 研究论文</h2>
@@ -160,92 +154,63 @@
   </section>
 </main>
 
-<!-- 底部 -->
 <footer class="footer" style="text-align: center; padding: 30px 0; border-top: 1px solid #eee; margin-top: 50px;">
   <p>&copy; 2026 SHIT JOURNAL | All Rights Unreserved</p>
 </footer>
 
 <script>
-// 已替换为你的SheetDB API地址
+// 你的SheetDB接口
 const SHEETDB_API = "https://sheetdb.io/api/v1/ev8cjfow1i90w";
 const ADMIN_USER = "admin";
 
-// 打开登录/注册弹窗
-function openAuth() {
+// ========== 核心：所有函数添加event参数，阻止冒泡和默认行为 ==========
+// 打开弹窗
+function openAuth(event) {
+  if (event) event.preventDefault(); // 阻止默认行为
+  if (event) event.stopPropagation(); // 阻止冒泡
   document.getElementById("authModal").style.display = "flex";
-  showLogin();
+  // 清空输入框，避免残留
+  document.getElementById("loginUser").value = "";
+  document.getElementById("loginPwd").value = "";
+  document.getElementById("regUser").value = "";
+  document.getElementById("regPwd").value = "";
+  document.getElementById("regPwd2").value = "";
 }
 
 // 关闭弹窗
-function closeAuth() {
+function closeAuth(event) {
+  if (event) event.preventDefault();
+  if (event) event.stopPropagation();
   document.getElementById("authModal").style.display = "none";
 }
 
-// 切换到登录
-function showLogin() {
+// 切换登录
+function showLogin(event) {
+  if (event) event.preventDefault();
+  if (event) event.stopPropagation();
   document.getElementById("loginForm").style.display = "block";
   document.getElementById("registerForm").style.display = "none";
   document.querySelectorAll(".tab-btn")[0].classList.add("active");
   document.querySelectorAll(".tab-btn")[1].classList.remove("active");
 }
 
-// 切换到注册
-function showRegister() {
+// 切换注册
+function showRegister(event) {
+  if (event) event.preventDefault();
+  if (event) event.stopPropagation();
   document.getElementById("loginForm").style.display = "none";
   document.getElementById("registerForm").style.display = "block";
   document.querySelectorAll(".tab-btn")[0].classList.remove("active");
   document.querySelectorAll(".tab-btn")[1].classList.add("active");
 }
 
-// 注册功能（对接SheetDB）
-async function doRegister() {
-  const user = document.getElementById("regUser").value.trim();
-  const pwd = document.getElementById("regPwd").value;
-  const pwd2 = document.getElementById("regPwd2").value;
+// 登录功能（彻底移除reload，避免刷新）
+async function doLogin(event) {
+  if (event) event.preventDefault();
+  if (event) event.stopPropagation();
 
-  if (!user || !pwd) {
-    alert("用户名和密码不能为空！");
-    return;
-  }
-  if (pwd !== pwd2) {
-    alert("两次密码不一致！");
-    return;
-  }
-
-  // 检查用户名是否存在
-  try {
-    const checkRes = await fetch(`${SHEETDB_API}?username=${user}`);
-    const checkData = await checkRes.json();
-    if (checkData.length > 0) {
-      alert("用户名已存在！");
-      return;
-    }
-
-    // 新增用户
-    const addRes = await fetch(SHEETDB_API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: { username: user, password: pwd } })
-    });
-
-    if (addRes.ok) {
-      alert("注册成功！请登录");
-      showLogin();
-      document.getElementById("regUser").value = "";
-      document.getElementById("regPwd").value = "";
-      document.getElementById("regPwd2").value = "";
-    } else {
-      alert("注册失败，请重试！");
-    }
-  } catch (e) {
-    alert("网络错误，请重试！");
-  }
-}
-
-// 登录功能（对接SheetDB）
-async function doLogin() {
   const user = document.getElementById("loginUser").value.trim();
-  const pwd = document.getElementById("loginPwd").value;
+  const pwd = document.getElementById("loginPwd").value.trim();
 
   if (!user || !pwd) {
     alert("用户名和密码不能为空！");
@@ -259,20 +224,66 @@ async function doLogin() {
     if (data.length > 0) {
       localStorage.setItem("loginUser", user);
       closeAuth();
-      checkLogin();
+      checkLogin(); // 仅更新状态，不刷新页面
       alert("登录成功！");
-      window.location.reload();
     } else {
       alert("账号或密码错误！");
     }
   } catch (e) {
-    alert("网络错误，请重试！");
+    alert("登录失败，请检查网络！");
+    console.error("登录错误：", e);
   }
 }
 
-// 检查登录状态
+// 注册功能
+async function doRegister(event) {
+  if (event) event.preventDefault();
+  if (event) event.stopPropagation();
+
+  const user = document.getElementById("regUser").value.trim();
+  const pwd = document.getElementById("regPwd").value.trim();
+  const pwd2 = document.getElementById("regPwd2").value.trim();
+
+  if (!user || !pwd) {
+    alert("用户名和密码不能为空！");
+    return;
+  }
+  if (pwd !== pwd2) {
+    alert("两次密码不一致！");
+    return;
+  }
+
+  try {
+    // 检查用户名是否存在
+    const checkRes = await fetch(`${SHEETDB_API}?username=${user}`);
+    const checkData = await checkRes.json();
+    if (checkData.length > 0) {
+      alert("用户名已存在！");
+      return;
+    }
+
+    // 注册用户
+    const addRes = await fetch(SHEETDB_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: { username: user, password: pwd } })
+    });
+
+    if (addRes.ok) {
+      alert("注册成功！请登录");
+      showLogin();
+    } else {
+      alert("注册失败，请重试！");
+    }
+  } catch (e) {
+    alert("注册失败，请检查网络！");
+    console.error("注册错误：", e);
+  }
+}
+
+// 检查登录状态（仅更新DOM，不刷新）
 function checkLogin() {
-  const user = localStorage.getItem("loginUser");
+  const user = localStorage.getItem("loginUser") || "";
   const loginBtn = document.getElementById("loginBtn");
   const userName = document.getElementById("userName");
   const logoutBtn = document.getElementById("logoutBtn");
@@ -282,13 +293,10 @@ function checkLogin() {
   if (user) {
     loginBtn.style.display = "none";
     userName.style.display = "inline";
-    logoutBtn.style.display = "inline";
     userName.innerText = user;
+    logoutBtn.style.display = "inline";
     submitLink.style.display = "inline";
-    
-    if (user === ADMIN_USER) {
-      adminEntrance.style.display = "inline";
-    }
+    adminEntrance.style.display = (user === ADMIN_USER) ? "inline" : "none";
   } else {
     loginBtn.style.display = "inline";
     userName.style.display = "none";
@@ -299,18 +307,33 @@ function checkLogin() {
 }
 
 // 退出登录
-function doLogout() {
+function doLogout(event) {
+  if (event) event.preventDefault();
+  if (event) event.stopPropagation();
   localStorage.removeItem("loginUser");
   checkLogin();
   alert("退出成功！");
 }
 
-// 页面加载初始化
-window.onload = function() {
+// 页面初始化（仅绑定事件，无刷新）
+document.addEventListener("DOMContentLoaded", function() {
+  // 绑定登录按钮
+  document.getElementById("loginBtn").addEventListener('click', openAuth);
+  // 绑定退出按钮
+  document.getElementById("logoutBtn").addEventListener('click', doLogout);
+  // 检查登录状态
   checkLogin();
-  document.getElementById("loginBtn").onclick = openAuth;
-  document.getElementById("logoutBtn").onclick = doLogout;
-};
+
+  // 点击弹窗外部关闭（阻止冒泡）
+  document.getElementById("authModal").addEventListener('click', function(e) {
+    if (e.target === this) closeAuth(e);
+  });
+
+  // 全局阻止表单默认提交（彻底杜绝刷新）
+  document.addEventListener('submit', function(e) {
+    e.preventDefault();
+  });
+});
 </script>
 </body>
 </html>

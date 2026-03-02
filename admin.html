@@ -4,8 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>管理员后台 | 屎记期刊</title>
+<!-- 保留原有样式文件，保证风格统一 -->
 <link rel="stylesheet" href="style.css">
 <style>
+  /* 仅添加后台专属样式，不修改全局 */
+  .admin-panel {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 0 20px;
+  }
   .user-list {
     margin: 30px 0;
     padding: 20px;
@@ -24,11 +31,7 @@
     border-radius: 4px;
     cursor: pointer;
     margin-top: 10px;
-  }
-  .admin-panel {
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 0 20px;
+    type: button;
   }
   .form-title {
     text-align: center;
@@ -36,43 +39,42 @@
     text-transform: uppercase;
   }
   .btn {
-    display: block;
-    width: 100%;
-    padding: 12px;
+    display: inline-block;
+    padding: 8px 15px;
     background: #000;
     color: #FFF;
     border: none;
     border-radius: 4px;
-    font-size: 1rem;
+    font-size: 14px;
     cursor: pointer;
-    text-transform: uppercase;
-    text-align: center;
     text-decoration: none;
+    margin-right: 10px;
   }
 </style>
 </head>
 <body>
+<!-- 保留原有导航结构，保证风格统一 -->
 <header class="header">
   <h1>屎记期刊 | 管理员后台</h1>
 </header>
 
 <nav class="nav">
-  <a href="index.html">返回首页</a>
-  <a href="#" id="logout-btn" style="margin-left:15px;">退出登录</a>
+  <a href="index.html" class="btn">返回首页</a>
+  <button class="btn" id="logout-btn" type="button">退出登录</button>
 </nav>
 
 <div class="admin-panel">
   <div class="user-list">
     <h2 class="form-title">注册用户列表</h2>
     <div id="userListContent">点击下方按钮加载用户...</div>
-    <button onclick="loadUserList()">加载所有注册用户</button>
+    <button type="button" onclick="loadUserList(event)">加载所有注册用户</button>
     <p style="margin-top:10px; font-size:12px; color:#666;">
       注：显示所有通过网站注册的用户（数据存储在SheetDB）
     </p>
   </div>
 
   <h2 class="form-title">投稿管理 | PAPER MANAGEMENT</h2>
-  <a href="https://wj.qq.com/stat/1/overview?sid=25846300&org=60060481740&lang=zhs" target="_blank" class="btn" style="width: auto; display: inline-block; margin-bottom: 30px;">查看所有投稿</a>
+  <a href="https://wj.qq.com/stat/1/overview?sid=25846300&org=60060481740&lang=zhs" target="_blank" class="btn">查看所有投稿</a>
   
   <h2 class="form-title" style="margin-top: 50px;">发布稿件教程</h2>
   <ul style="margin-left: 20px; line-height: 2;">
@@ -83,16 +85,20 @@
 </div>
 
 <script>
-// 已替换为你的SheetDB API地址
 const SHEETDB_API = "https://sheetdb.io/api/v1/ev8cjfow1i90w";
 
-// 加载所有用户
-async function loadUserList() {
+// 加载用户（阻止冒泡+默认行为）
+async function loadUserList(event) {
+  if (event) event.preventDefault();
+  if (event) event.stopPropagation();
+
+  const content = document.getElementById("userListContent");
+  content.innerHTML = "正在加载...";
+
   try {
     const res = await fetch(SHEETDB_API);
     const data = await res.json();
-    const content = document.getElementById("userListContent");
-    
+
     if (data.length === 0) {
       content.innerHTML = "<p>暂无注册用户</p>";
       return;
@@ -105,25 +111,34 @@ async function loadUserList() {
     html += "</ul>";
     content.innerHTML = html;
   } catch (e) {
-    alert("加载用户失败，请重试！");
-    console.error("加载用户报错：", e);
+    content.innerHTML = "<p>加载失败，请重试！</p>";
+    console.error("加载用户错误：", e);
   }
 }
 
-// 检查管理员权限
-window.onload = function() {
-  const user = localStorage.getItem("loginUser");
-  if (!user || user !== "admin") {
+// 页面初始化（无刷新）
+document.addEventListener("DOMContentLoaded", function() {
+  // 验证管理员权限
+  const user = localStorage.getItem("loginUser") || "";
+  if (user !== ADMIN_USER) {
     alert("仅管理员可访问！");
     window.location.href = "index.html";
+    return;
   }
-  
-  document.getElementById("logout-btn").onclick = function(e) {
-    e.preventDefault();
+
+  // 退出登录（无刷新）
+  document.getElementById("logout-btn").addEventListener('click', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
     localStorage.removeItem("loginUser");
     window.location.href = "index.html";
-  };
-};
+  });
+
+  // 阻止表单提交刷新
+  document.addEventListener('submit', function(e) {
+    e.preventDefault();
+  });
+});
 </script>
 </body>
 </html>
