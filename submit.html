@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投稿 | 屎记期刊</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4.72.0/dist/clerk.browser.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<header class="header">
+  <h1>屎记期刊 | SHIT JOURNAL</h1>
+  <p class="slogan">Truth Fades, S.H.I.T Lasts.</p>
+</header>
+
+<nav class="nav">
+  <a href="index.html">返回首页</a>
+  <a href="#" id="logout-btn" style="margin-left:15px;">退出登录</a>
+</nav>
+
+<div class="form-container">
+  <h2 class="form-title">在线投稿 | SUBMIT PAPER</h2>
+  <p style="margin-bottom: 20px; text-align: center; color: #666;">请填写以下表单完成投稿，提交后1-2个工作日内审核</p>
+  <a href="https://wj.qq.com/s2/25846300/285e/" target="_blank" class="btn">点击进入投稿表单</a>
+</div>
+
+<script>
+const CLERK_PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
+Clerk.load({ publishableKey: CLERK_PUB_KEY }).then(() => {
+  // 退出登录按钮
+  document.getElementById("logout-btn").addEventListener('click', async (e) => {
+    e.preventDefault();
+    await Clerk.signOut();
+    window.location.href = "index.html";
+  });
+  // 未登录自动跳首页
+  if (!Clerk.user) {
+    window.location.href = "index.html";
+  }
+});
+</script>
+</body>
+</html>

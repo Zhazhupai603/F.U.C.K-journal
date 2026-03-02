@@ -5,25 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>管理员后台 | 屎记期刊</title>
 <link rel="stylesheet" href="style.css">
-<!-- 集成Clerk -->
-<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4.72.0/dist/clerk.browser.js" crossorigin="anonymous"></script>
 </head>
 <body>
-<!-- 顶部标题 -->
 <header class="header">
   <h1>屎记期刊 | 管理员后台</h1>
 </header>
 
-<!-- 导航栏 -->
 <nav class="nav">
   <a href="index.html">返回首页</a>
-  <a href="#" id="logout-btn">退出登录</a>
+  <a href="#" id="logout-btn" style="margin-left:15px;">退出登录</a>
 </nav>
 
-<!-- 管理员面板 -->
 <div class="admin-panel">
   <h2 class="form-title">投稿管理 | PAPER MANAGEMENT</h2>
-  <!-- 已填你的腾讯问卷后台链接 -->
   <a href="https://wj.qq.com/stat/1/overview?sid=25846300&org=60060481740&lang=zhs" target="_blank" class="btn" style="width: auto; display: inline-block; margin-bottom: 30px;">查看所有投稿</a>
   
   <h2 class="form-title" style="margin-top: 50px;">发布稿件教程</h2>
@@ -34,21 +29,20 @@
   </ul>
 </div>
 
-<!-- Clerk初始化 + 权限控制 -->
 <script>
-const PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
-// 替换成你的管理员邮箱
+const CLERK_PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
 const ADMIN_EMAIL = "23301020010@m.fudan.edu.cn";
 
-Clerk.load({ publishableKey: PUB_KEY }).then(() => {
+Clerk.load({ publishableKey: CLERK_PUB_KEY }).then(() => {
   // 退出登录
-  document.getElementById("logout-btn").addEventListener('click', async () => {
+  document.getElementById("logout-btn").addEventListener('click', async (e) => {
+    e.preventDefault();
     await Clerk.signOut();
     window.location.href = "index.html";
   });
   
   // 仅管理员可访问
-  if (Clerk.user?.emailAddresses[0]?.emailAddress !== ADMIN_EMAIL) {
+  if (!Clerk.user || Clerk.user.emailAddresses[0]?.emailAddress !== ADMIN_EMAIL) {
     window.location.href = "index.html";
   }
 });

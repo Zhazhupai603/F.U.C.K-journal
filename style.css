@@ -17,7 +17,7 @@ body {
 /* 头部样式：适配右上角登录 */
 .header {
   text-align: center;
-  padding: 60px 0 40px; /* 顶部留登录空间 */
+  padding: 60px 0 40px;
   border-bottom: 1px solid #EEEEEE;
   position: relative;
 }
@@ -35,7 +35,7 @@ body {
   font-style: italic;
 }
 
-/* 导航栏样式：按你的要求排列 */
+/* 导航栏样式 */
 .nav {
   text-align: center;
   padding: 20px 0;
@@ -46,18 +46,18 @@ body {
 .nav a {
   color: #000;
   text-decoration: none;
-  margin: 0 12px; /* 调整间距，适配多链接 */
+  margin: 0 12px;
   font-weight: bold;
   text-transform: uppercase;
   font-size: 0.9rem;
-  cursor: pointer; /* 强制手型，确保可点击 */
+  cursor: pointer;
 }
 
 .nav a:hover {
   text-decoration: underline;
 }
 
-/* 内容区样式不变 */
+/* 内容区样式 */
 .content {
   margin-bottom: 50px;
 }
@@ -123,4 +123,13 @@ hr {
   max-width: 800px;
   margin: 50px auto;
   padding: 0 20px;
+}
+
+/* 登录页专属样式 */
+.login-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  border: 1px solid #eee;
+  text-align: center;
 }

@@ -13,7 +13,7 @@
     position: absolute;
     top: 20px;
     right: 20px;
-    z-index: 999; /* 确保在最上层，不遮挡也不被遮挡 */
+    z-index: 999;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -37,7 +37,7 @@
   /* 页面头部预留登录空间 */
   .header {
     position: relative;
-    padding-top: 60px; /* 给右上角登录按钮留空间 */
+    padding-top: 60px;
   }
 </style>
 </head>
@@ -46,7 +46,10 @@
 <header class="header">
   <!-- 右上角登录/后台入口 -->
   <div id="auth-container">
-    <div id="clerk-login"></div>
+    <div id="clerk-login">
+      <!-- 优先显示登录链接，避免加载失败 -->
+      <a href="login.html" style="color: #000; text-decoration: underline; font-size:14px;">登录/注册</a>
+    </div>
     <a href="admin.html" id="admin-entrance">后台</a>
   </div>
 
@@ -54,7 +57,7 @@
   <p class="slogan">Truth Fades, S.H.I.T Lasts. 真理会过时，构石永恒。</p>
 </header>
 
-<!-- 导航栏（按你的要求调整） -->
+<!-- 导航栏 -->
 <nav class="nav">
   <a href="index.html">HOME 主页</a>
   <a href="submit.html" id="submit-link">SUBMIT 投稿</a>
@@ -84,9 +87,9 @@
 </footer>
 
 <script>
-// 1. 替换成你的管理员邮箱（必须和Clerk注册邮箱一致！）
+// 已填入你的管理员邮箱
 const ADMIN_EMAIL = "23301020010@m.fudan.edu.cn";
-// 2. Clerk密钥（无需修改）
+// Clerk密钥（无需修改）
 const CLERK_PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
 
 // 初始化Clerk
@@ -133,7 +136,7 @@ async function initAuth() {
     window.Clerk.addListener(updateAuthUI);
 
   } catch (error) {
-    // 加载失败时显示备用登录链接
+    // 加载失败时保留登录链接
     console.error('Clerk加载失败:', error);
     const loginContainer = document.getElementById('clerk-login');
     loginContainer.innerHTML = '<a href="login.html" style="color: #000; text-decoration: underline; font-size:14px;">登录/注册</a>';
