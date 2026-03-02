@@ -7,6 +7,14 @@
 <link rel="stylesheet" href="style.css">
 <!-- 集成Clerk登录组件 -->
 <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
+<style>
+  /* 修复Clerk遮挡问题：限定组件宽度，取消全屏遮挡 */
+  #clerk {
+    display: inline-block;
+    margin-left: 20px;
+    vertical-align: middle;
+  }
+</style>
 </head>
 <body>
 <!-- 顶部标题区 -->
@@ -20,7 +28,7 @@
   <a href="index.html">HOME</a>
   <a href="submit.html" id="submit" style="display:none">SUBMIT 投稿</a>
   <a href="admin.html" id="admin" style="display:none">ADMIN 后台</a>
-  <!-- Clerk登录/注册/退出组件 -->
+  <!-- Clerk登录/注册/退出组件（已加样式防遮挡） -->
   <div id="clerk"></div>
 </nav>
 
@@ -45,27 +53,39 @@
   <p>&copy; 2026 SHIT JOURNAL | All Rights Unreserved</p>
 </footer>
 
-<!-- Clerk初始化（已填你的密钥） -->
+<!-- Clerk初始化（修复监听+防遮挡） -->
 <script>
 // 你的Clerk Publishable Key
 const PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
-// 替换成你的管理员邮箱（比如 your@email.com）
-const ADMIN_EMAIL = "你的管理员邮箱@xxx.com";
+// 替换成你的管理员邮箱（必须和Clerk注册邮箱一致）
+const ADMIN_EMAIL = "23301020010@m.fudan.edu.cnss";
 
-// 初始化Clerk登录
+// 初始化Clerk并实时监听登录状态
 Clerk.load({ publishableKey: PUB_KEY }).then(() => {
-  // 渲染登录/退出按钮
-  Clerk.mountUserButton("#clerk");
+  // 渲染登录/退出按钮（限定为小型用户按钮，防遮挡）
+  Clerk.mountUserButton("#clerk", {
+    appearance: { baseTheme: 'light' }
+  });
 
-  // 监听登录状态
-  if (Clerk.user) {
-    // 登录后显示投稿链接
-    document.getElementById("submit").style.display = "inline";
-    // 管理员显示后台链接
-    if (Clerk.user.emailAddresses[0]?.emailAddress === ADMIN_EMAIL) {
-      document.getElementById("admin").style.display = "inline";
+  // 实时监听登录状态变化（核心修复：确保登录后链接正常显示）
+  Clerk.addListener((auth) => {
+    const submitLink = document.getElementById("submit");
+    const adminLink = document.getElementById("admin");
+    if (auth.user) {
+      // 登录后显示投稿链接
+      submitLink.style.display = "inline";
+      // 管理员邮箱显示后台链接
+      if (auth.user.emailAddresses[0]?.emailAddress === ADMIN_EMAIL) {
+        adminLink.style.display = "inline";
+      } else {
+        adminLink.style.display = "none";
+      }
+    } else {
+      // 未登录隐藏所有功能链接
+      submitLink.style.display = "none";
+      adminLink.style.display = "none";
     }
-  }
+  });
 });
 </script>
 </body>
