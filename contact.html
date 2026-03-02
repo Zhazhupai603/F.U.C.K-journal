@@ -38,7 +38,32 @@
 </style>
 </head>
 <body>
+<!-- 统一提示弹窗（替换所有 alert） -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="modalTitle">提示</h3>
+    <p id="modalText">消息内容</p>
+    <button class="btn btn-cancel" onclick="hideModal()">取消</button>
+    <button class="btn btn-confirm" id="modalOkBtn" onclick="hideModal()">确定</button>
+  </div>
+</div>
 
+<script>
+// 显示自定义弹窗
+function showModal(text, title = "提示", callback = null) {
+  document.getElementById("modalTitle").innerText = title;
+  document.getElementById("modalText").innerText = text;
+  document.getElementById("modal").classList.add("active");
+  const okBtn = document.getElementById("modalOkBtn");
+  okBtn.onclick = () => {
+    hideModal();
+    if (callback) callback();
+  };
+}
+function hideModal() {
+  document.getElementById("modal").classList.remove("active");
+}
+</script>
 <header class="header">
   <div class="container">
     <div id="auth-container">
