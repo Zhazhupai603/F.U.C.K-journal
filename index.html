@@ -3,11 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>屎记期刊 | SHIT JOURNAL</title>
-<!-- 保留你原有的样式文件，保证风格统一 -->
-<link rel="stylesheet" href="style.css">
+<title>F.U.C.K | Fudan undergraduate course-work</title>
+<!-- 引入开源字体和图标，提升质感 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  /* 仅添加登录弹窗样式，不修改全局样式，保证和其他页面一致 */
+  /* 全局样式重置+基础配置 */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Roboto', 'Noto Serif SC', serif;
+    color: #333;
+    background-color: #f8f9fa;
+    line-height: 1.6;
+  }
+  a {
+    text-decoration: none;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+  }
+  a:hover {
+    color: #e74c3c;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* 登录/注册弹窗（保留功能，美化样式） */
   .auth-modal {
     display: none;
     position: fixed;
@@ -15,86 +42,251 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.7);
     z-index: 9999;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(2px);
   }
   .auth-form {
     background: #fff;
-    padding: 30px;
-    border-radius: 8px;
-    width: 350px;
+    padding: 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
     text-align: center;
-    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    position: relative;
   }
   .auth-form .close-btn {
-    float: right;
+    position: absolute;
+    top: 15px;
+    right: 20px;
     cursor: pointer;
-    font-size: 20px;
-    color: #666;
-    margin-top: -10px;
-    margin-right: -10px;
+    font-size: 24px;
+    color: #999;
+    transition: color 0.3s;
+  }
+  .auth-form .close-btn:hover {
+    color: #e74c3c;
   }
   .auth-form input {
     width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    box-sizing: border-box;
+    padding: 12px 15px;
+    margin: 12px 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border 0.3s;
+  }
+  .auth-form input:focus {
+    outline: none;
+    border-color: #2c3e50;
   }
   .auth-form button {
     width: 100%;
-    padding: 10px;
-    background: #000;
+    padding: 12px;
+    background: #2c3e50;
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    margin-top: 10px;
+    margin-top: 15px;
+    font-size: 16px;
+    transition: background 0.3s;
+  }
+  .auth-form button:hover {
+    background: #e74c3c;
   }
   .tab-btn {
     display: inline-block;
-    padding: 5px 15px;
-    margin: 0 5px 10px;
+    padding: 8px 20px;
+    margin: 0 5px 15px;
     cursor: pointer;
     border-bottom: 2px solid transparent;
+    font-weight: 500;
   }
   .tab-btn.active {
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid #e74c3c;
+    color: #e74c3c;
   }
   #registerForm {
     display: none;
   }
-  /* 登录容器样式（和你原有页面布局匹配） */
+
+  /* 登录容器（美化，固定右上角） */
   #auth-container {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 25px;
+    right: 30px;
     z-index: 999;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+    font-size: 14px;
   }
   #admin-entrance {
     display: none;
-    color: #000;
+    color: #e74c3c;
     text-decoration: none;
     font-size: 14px;
     font-weight: bold;
+    padding: 5px 10px;
+    border: 1px solid #e74c3c;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+  #admin-entrance:hover {
+    background: #e74c3c;
+    color: #fff;
   }
   #submit-link {
     display: none;
   }
+
+  /* 头部样式（期刊风格，突出F.U.C.K） */
   .header {
     position: relative;
-    padding-top: 60px;
+    padding: 80px 0 40px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+  }
+  .journal-logo {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+  }
+  /* F/U/C/K 大写加粗高亮 */
+  .journal-logo span {
+    color: #e74c3c;
+    font-weight: 900;
+    font-size: 4rem;
+  }
+  .journal-fullname {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  .slogan {
+    font-size: 1.3rem;
+    color: #2c3e50;
+    font-weight: 500;
+    margin-top: 10px;
+    letter-spacing: 1px;
+  }
+
+  /* 导航栏（期刊风格，固定顶部下方） */
+  .nav {
+    background-color: #2c3e50;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .nav a {
+    color: #fff;
+    padding: 10px 20px;
+    margin: 0 5px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+  .nav a:hover, #submit-link:hover {
+    background-color: #e74c3c;
+    color: #fff;
+  }
+  #submit-link {
+    background-color: #e74c3c;
+  }
+
+  /* 主内容区（专业期刊分栏布局） */
+  .content {
+    padding: 50px 0;
+  }
+  .section {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+  }
+  .section h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eee;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .paper {
+    padding: 30px;
+    border-left: 4px solid #e74c3c;
+    background-color: #f9f9f9;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 25px;
+    transition: transform 0.3s;
+  }
+  .paper:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  }
+  .paper h3 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
+  .paper p {
+    color: #666;
+    margin-bottom: 8px;
+    line-height: 1.8;
+  }
+
+  /* 页脚（期刊风格） */
+  .footer {
+    text-align: center;
+    padding: 40px 0;
+    background-color: #2c3e50;
+    color: #fff;
+    margin-top: 50px;
+  }
+  .footer p {
+    font-size: 14px;
+    opacity: 0.8;
+  }
+
+  /* 响应式适配（移动端友好） */
+  @media (max-width: 768px) {
+    .journal-logo {
+      font-size: 2.5rem;
+    }
+    .journal-logo span {
+      font-size: 3rem;
+    }
+    .nav a {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+    .section {
+      padding: 20px;
+    }
+    .paper {
+      padding: 20px;
+    }
+    #auth-container {
+      top: 15px;
+      right: 15px;
+      font-size: 12px;
+    }
   }
 </style>
 </head>
 <body>
-<!-- 登录/注册弹窗 -->
+<!-- 登录/注册弹窗（功能保留） -->
 <div class="auth-modal" id="authModal">
   <div class="auth-form">
     <span class="close-btn" onclick="closeAuth(event)">&times;</span>
@@ -106,7 +298,6 @@
     <div id="loginForm">
       <input type="text" id="loginUser" placeholder="请输入用户名">
       <input type="password" id="loginPwd" placeholder="请输入密码">
-      <!-- 核心：type="button" + onclick阻止冒泡 -->
       <button type="button" onclick="doLogin(event)">登录</button>
     </div>
     <!-- 注册表单 -->
@@ -119,43 +310,62 @@
   </div>
 </div>
 
-<!-- 原有页面结构（完全保留，保证风格统一） -->
+<!-- 头部（突出F.U.C.K品牌+新slogan） -->
 <header class="header">
-  <div id="auth-container">
-    <span id="loginBtn" style="cursor:pointer; text-decoration:underline; font-size:14px;">登录/注册</span>
-    <span id="userName" style="display:none; font-size:14px;"></span>
-    <span id="logoutBtn" style="display:none; cursor:pointer; text-decoration:underline; font-size:14px; margin-left:10px;">退出</span>
-    <a href="admin.html" id="admin-entrance">后台</a>
-  </div>
+  <div class="container">
+    <div id="auth-container">
+      <span id="loginBtn" style="cursor:pointer; text-decoration:underline; color:#e74c3c;">登录/注册</span>
+      <span id="userName" style="display:none; color:#2c3e50; font-weight:500;"></span>
+      <span id="logoutBtn" style="display:none; cursor:pointer; text-decoration:underline; color:#e74c3c;">退出</span>
+      <a href="admin.html" id="admin-entrance">后台</a>
+    </div>
 
-  <h1>屎记期刊 | SHIT JOURNAL</h1>
-  <p class="slogan">Truth Fades, S.H.I.T Lasts. 真理会过时，构石永恒。</p>
+    <div class="journal-logo">
+      F<span>.</span>U<span>.</span>C<span>.</span>K
+    </div>
+    <div class="journal-fullname">Fudan undergraduate course-work</div>
+    <p class="slogan">每一篇，都是DDL的奇迹</p>
+  </div>
 </header>
 
+<!-- 导航栏（期刊风格） -->
 <nav class="nav">
-  <a href="index.html">HOME 主页</a>
-  <a href="submit.html" id="submit-link">SUBMIT 投稿</a>
-  <a href="community.html">COMMUNITY 社区</a>
-  <a href="paper.html">PAPER 论文</a>
-  <a href="contact.html">CONTACT US 联系我们</a>
+  <div class="container">
+    <a href="index.html">HOME 主页</a>
+    <a href="submit.html" id="submit-link">SUBMIT 投稿</a>
+    <a href="community.html">COMMUNITY 社区</a>
+    <a href="paper.html">PAPER 论文</a>
+    <a href="contact.html">CONTACT US 联系我们</a>
+  </div>
 </nav>
 
+<!-- 主内容区（专业期刊布局） -->
 <main class="content">
-  <section class="section">
-    <h2>RESEARCH ARTICLES 研究论文</h2>
-    <hr>
-    <div id="papers">
-      <div class="paper">
-        <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
-        <p>作者：Dr.摸鱼达人 | DOI: 10.S.H.I.T/2026.001</p>
-        <p>摘要：本研究通过对500个工位的6个月跟踪，发现工位距离咖啡机每增加1米，摸鱼频率提升12.5%，且该结论具有统计学意义（p<0.0001，无实际意义）。</p>
+  <div class="container">
+    <section class="section">
+      <h2>RESEARCH ARTICLES 研究论文</h2>
+      <div id="papers">
+        <div class="paper">
+          <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
+          <p>作者：Dr.摸鱼达人 | DOI: 10.FUCK/2026.001</p>
+          <p>摘要：本研究通过对500个工位的6个月跟踪，发现工位距离咖啡机每增加1米，摸鱼频率提升12.5%，且该结论具有统计学意义（p<0.0001，无实际意义）。</p>
+        </div>
+        <!-- 可新增更多论文条目 -->
+        <div class="paper">
+          <h3>DDL截止前24小时论文完成质量研究</h3>
+          <p>作者：Dr.赶due人 | DOI: 10.FUCK/2026.002</p>
+          <p>摘要：本研究分析了1000篇本科课程论文，发现DDL前24小时完成的论文，查重率平均降低8%，但错别字数量提升15%，符合「DDL奇迹定律」。</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </main>
 
-<footer class="footer" style="text-align: center; padding: 30px 0; border-top: 1px solid #eee; margin-top: 50px;">
-  <p>&copy; 2026 SHIT JOURNAL | All Rights Unreserved</p>
+<!-- 页脚（期刊风格） -->
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2026 F.U.C.K | Fudan undergraduate course-work | 每一篇，都是DDL的奇迹</p>
+  </div>
 </footer>
 
 <script>
@@ -163,13 +373,11 @@
 const SHEETDB_API = "https://sheetdb.io/api/v1/ev8cjfow1i90w";
 const ADMIN_USER = "admin";
 
-// ========== 核心：所有函数添加event参数，阻止冒泡和默认行为 ==========
-// 打开弹窗
+// ========== 核心功能保留（无刷新） ==========
 function openAuth(event) {
-  if (event) event.preventDefault(); // 阻止默认行为
-  if (event) event.stopPropagation(); // 阻止冒泡
+  if (event) event.preventDefault();
+  if (event) event.stopPropagation();
   document.getElementById("authModal").style.display = "flex";
-  // 清空输入框，避免残留
   document.getElementById("loginUser").value = "";
   document.getElementById("loginPwd").value = "";
   document.getElementById("regUser").value = "";
@@ -177,14 +385,12 @@ function openAuth(event) {
   document.getElementById("regPwd2").value = "";
 }
 
-// 关闭弹窗
 function closeAuth(event) {
   if (event) event.preventDefault();
   if (event) event.stopPropagation();
   document.getElementById("authModal").style.display = "none";
 }
 
-// 切换登录
 function showLogin(event) {
   if (event) event.preventDefault();
   if (event) event.stopPropagation();
@@ -194,7 +400,6 @@ function showLogin(event) {
   document.querySelectorAll(".tab-btn")[1].classList.remove("active");
 }
 
-// 切换注册
 function showRegister(event) {
   if (event) event.preventDefault();
   if (event) event.stopPropagation();
@@ -204,7 +409,6 @@ function showRegister(event) {
   document.querySelectorAll(".tab-btn")[1].classList.add("active");
 }
 
-// 登录功能（彻底移除reload，避免刷新）
 async function doLogin(event) {
   if (event) event.preventDefault();
   if (event) event.stopPropagation();
@@ -224,7 +428,7 @@ async function doLogin(event) {
     if (data.length > 0) {
       localStorage.setItem("loginUser", user);
       closeAuth();
-      checkLogin(); // 仅更新状态，不刷新页面
+      checkLogin();
       alert("登录成功！");
     } else {
       alert("账号或密码错误！");
@@ -235,7 +439,6 @@ async function doLogin(event) {
   }
 }
 
-// 注册功能
 async function doRegister(event) {
   if (event) event.preventDefault();
   if (event) event.stopPropagation();
@@ -254,7 +457,6 @@ async function doRegister(event) {
   }
 
   try {
-    // 检查用户名是否存在
     const checkRes = await fetch(`${SHEETDB_API}?username=${user}`);
     const checkData = await checkRes.json();
     if (checkData.length > 0) {
@@ -262,7 +464,6 @@ async function doRegister(event) {
       return;
     }
 
-    // 注册用户
     const addRes = await fetch(SHEETDB_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -281,7 +482,6 @@ async function doRegister(event) {
   }
 }
 
-// 检查登录状态（仅更新DOM，不刷新）
 function checkLogin() {
   const user = localStorage.getItem("loginUser") || "";
   const loginBtn = document.getElementById("loginBtn");
@@ -306,7 +506,6 @@ function checkLogin() {
   }
 }
 
-// 退出登录
 function doLogout(event) {
   if (event) event.preventDefault();
   if (event) event.stopPropagation();
@@ -315,21 +514,15 @@ function doLogout(event) {
   alert("退出成功！");
 }
 
-// 页面初始化（仅绑定事件，无刷新）
 document.addEventListener("DOMContentLoaded", function() {
-  // 绑定登录按钮
   document.getElementById("loginBtn").addEventListener('click', openAuth);
-  // 绑定退出按钮
   document.getElementById("logoutBtn").addEventListener('click', doLogout);
-  // 检查登录状态
   checkLogin();
 
-  // 点击弹窗外部关闭（阻止冒泡）
   document.getElementById("authModal").addEventListener('click', function(e) {
     if (e.target === this) closeAuth(e);
   });
 
-  // 全局阻止表单默认提交（彻底杜绝刷新）
   document.addEventListener('submit', function(e) {
     e.preventDefault();
   });
