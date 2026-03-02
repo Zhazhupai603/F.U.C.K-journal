@@ -5,9 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>屎记期刊 | SHIT JOURNAL</title>
 <link rel="stylesheet" href="style.css">
-<!-- 集成Clerk登录组件 -->
-<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4.72.0/dist/clerk.browser.js" crossorigin="anonymous"></script>
 <style>
+  /* 登录/注册弹窗样式 */
+  .auth-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+  }
+  .auth-form {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    width: 350px;
+    text-align: center;
+  }
+  .auth-form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #eee;
+    border-radius: 4px;
+  }
+  .auth-form button {
+    width: 100%;
+    padding: 10px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .auth-form button:hover {
+    background: #333;
+  }
+  .close-btn {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
+  }
+  .tab-btn {
+    display: inline-block;
+    padding: 5px 15px;
+    margin: 0 5px 10px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tab-btn.active {
+    border-bottom: 2px solid #000;
+  }
+  #registerForm {
+    display: none;
+  }
   /* 登录容器固定在右上角 */
   #auth-container {
     position: absolute;
@@ -42,14 +98,37 @@
 </style>
 </head>
 <body>
+<!-- 登录/注册弹窗 -->
+<div class="auth-modal" id="authModal">
+  <div class="auth-form">
+    <span class="close-btn" onclick="closeAuth()">&times;</span>
+    <!-- 登录/注册标签切换 -->
+    <div>
+      <span class="tab-btn active" onclick="showLogin()">登录</span>
+      <span class="tab-btn" onclick="showRegister()">注册</span>
+    </div>
+    <!-- 登录表单 -->
+    <div id="loginForm">
+      <input type="text" id="loginUser" placeholder="请输入用户名" required>
+      <input type="password" id="loginPwd" placeholder="请输入密码" required>
+      <button onclick="doLogin()">登录</button>
+    </div>
+    <!-- 注册表单 -->
+    <div id="registerForm">
+      <input type="text" id="regUser" placeholder="请设置用户名" required>
+      <input type="password" id="regPwd" placeholder="请设置密码" required>
+      <input type="password" id="regPwd2" placeholder="请确认密码" required>
+      <button onclick="doRegister()">注册</button>
+    </div>
+  </div>
+</div>
+
 <!-- 顶部标题区 + 右上角登录 -->
 <header class="header">
-  <!-- 右上角登录/后台入口 -->
   <div id="auth-container">
-    <div id="clerk-login">
-      <!-- 优先显示登录链接，避免加载失败 -->
-      <a href="login.html" style="color: #000; text-decoration: underline; font-size:14px;">登录/注册</a>
-    </div>
+    <span id="loginBtn" style="color: #000; text-decoration: underline; font-size:14px; cursor:pointer;">登录/注册</span>
+    <span id="userName" style="display:none; font-size:14px;"></span>
+    <span id="logoutBtn" style="display:none; color: #000; text-decoration: underline; font-size:14px; cursor:pointer; margin-left:10px;">退出</span>
     <a href="admin.html" id="admin-entrance">后台</a>
   </div>
 
@@ -87,64 +166,151 @@
 </footer>
 
 <script>
-// 已填入你的管理员邮箱
-const ADMIN_EMAIL = "23301020010@m.fudan.edu.cn";
-// Clerk密钥（无需修改）
-const CLERK_PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
+// 已替换为你的SheetDB API地址
+const SHEETDB_API = "https://sheetdb.io/api/v1/ev8cjfow1i90w";
+const ADMIN_USER = "admin";
 
-// 初始化Clerk
-async function initAuth() {
+// 打开登录/注册弹窗
+function openAuth() {
+  document.getElementById("authModal").style.display = "flex";
+  showLogin();
+}
+
+// 关闭弹窗
+function closeAuth() {
+  document.getElementById("authModal").style.display = "none";
+}
+
+// 切换到登录
+function showLogin() {
+  document.getElementById("loginForm").style.display = "block";
+  document.getElementById("registerForm").style.display = "none";
+  document.querySelectorAll(".tab-btn")[0].classList.add("active");
+  document.querySelectorAll(".tab-btn")[1].classList.remove("active");
+}
+
+// 切换到注册
+function showRegister() {
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("registerForm").style.display = "block";
+  document.querySelectorAll(".tab-btn")[0].classList.remove("active");
+  document.querySelectorAll(".tab-btn")[1].classList.add("active");
+}
+
+// 注册功能（对接SheetDB）
+async function doRegister() {
+  const user = document.getElementById("regUser").value.trim();
+  const pwd = document.getElementById("regPwd").value;
+  const pwd2 = document.getElementById("regPwd2").value;
+
+  if (!user || !pwd) {
+    alert("用户名和密码不能为空！");
+    return;
+  }
+  if (pwd !== pwd2) {
+    alert("两次密码不一致！");
+    return;
+  }
+
+  // 检查用户名是否存在
   try {
-    await window.Clerk.load({ publishableKey: CLERK_PUB_KEY });
+    const checkRes = await fetch(`${SHEETDB_API}?username=${user}`);
+    const checkData = await checkRes.json();
+    if (checkData.length > 0) {
+      alert("用户名已存在！");
+      return;
+    }
 
-    // 渲染登录按钮（极简样式，适配右上角）
-    window.Clerk.mountUserButton("#clerk-login", {
-      appearance: {
-        baseTheme: 'light',
-        elements: {
-          userButton: { width: 'auto', height: '30px' },
-          userButtonText: { fontSize: '14px' },
-          userButtonAvatar: { display: 'none' }
-        }
-      }
+    // 新增用户
+    const addRes = await fetch(SHEETDB_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: { username: user, password: pwd } })
     });
 
-    // 监听登录状态，更新链接显示
-    const updateAuthUI = (auth) => {
-      const submitLink = document.getElementById('submit-link');
-      const adminEntrance = document.getElementById('admin-entrance');
-      
-      if (auth?.user) {
-        // 登录后显示投稿链接
-        submitLink.style.display = 'inline';
-        // 管理员显示后台入口（右上角）
-        const userEmail = auth.user.emailAddresses[0]?.emailAddress;
-        if (userEmail === ADMIN_EMAIL) {
-          adminEntrance.style.display = 'inline';
-        } else {
-          adminEntrance.style.display = 'none';
-        }
-      } else {
-        // 未登录隐藏投稿和后台
-        submitLink.style.display = 'none';
-        adminEntrance.style.display = 'none';
-      }
-    };
-
-    // 初始执行 + 监听变化
-    updateAuthUI(window.Clerk.auth);
-    window.Clerk.addListener(updateAuthUI);
-
-  } catch (error) {
-    // 加载失败时保留登录链接
-    console.error('Clerk加载失败:', error);
-    const loginContainer = document.getElementById('clerk-login');
-    loginContainer.innerHTML = '<a href="login.html" style="color: #000; text-decoration: underline; font-size:14px;">登录/注册</a>';
+    if (addRes.ok) {
+      alert("注册成功！请登录");
+      showLogin();
+      document.getElementById("regUser").value = "";
+      document.getElementById("regPwd").value = "";
+      document.getElementById("regPwd2").value = "";
+    } else {
+      alert("注册失败，请重试！");
+    }
+  } catch (e) {
+    alert("网络错误，请重试！");
   }
 }
 
-// 页面加载完成后初始化
-window.onload = initAuth;
+// 登录功能（对接SheetDB）
+async function doLogin() {
+  const user = document.getElementById("loginUser").value.trim();
+  const pwd = document.getElementById("loginPwd").value;
+
+  if (!user || !pwd) {
+    alert("用户名和密码不能为空！");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${SHEETDB_API}?username=${user}&password=${pwd}`);
+    const data = await res.json();
+
+    if (data.length > 0) {
+      localStorage.setItem("loginUser", user);
+      closeAuth();
+      checkLogin();
+      alert("登录成功！");
+      window.location.reload();
+    } else {
+      alert("账号或密码错误！");
+    }
+  } catch (e) {
+    alert("网络错误，请重试！");
+  }
+}
+
+// 检查登录状态
+function checkLogin() {
+  const user = localStorage.getItem("loginUser");
+  const loginBtn = document.getElementById("loginBtn");
+  const userName = document.getElementById("userName");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const submitLink = document.getElementById("submit-link");
+  const adminEntrance = document.getElementById("admin-entrance");
+
+  if (user) {
+    loginBtn.style.display = "none";
+    userName.style.display = "inline";
+    logoutBtn.style.display = "inline";
+    userName.innerText = user;
+    submitLink.style.display = "inline";
+    
+    if (user === ADMIN_USER) {
+      adminEntrance.style.display = "inline";
+    }
+  } else {
+    loginBtn.style.display = "inline";
+    userName.style.display = "none";
+    logoutBtn.style.display = "none";
+    submitLink.style.display = "none";
+    adminEntrance.style.display = "none";
+  }
+}
+
+// 退出登录
+function doLogout() {
+  localStorage.removeItem("loginUser");
+  checkLogin();
+  alert("退出成功！");
+}
+
+// 页面加载初始化
+window.onload = function() {
+  checkLogin();
+  document.getElementById("loginBtn").onclick = openAuth;
+  document.getElementById("logoutBtn").onclick = doLogout;
+};
 </script>
 </body>
 </html>
