@@ -6,30 +6,61 @@
 <title>屎记期刊 | SHIT JOURNAL</title>
 <link rel="stylesheet" href="style.css">
 <!-- 集成Clerk登录组件 -->
-<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4.72.0/dist/clerk.browser.js" crossorigin="anonymous"></script>
 <style>
-  /* 修复Clerk遮挡问题：限定组件宽度，取消全屏遮挡 */
-  #clerk {
-    display: inline-block;
-    margin-left: 20px;
-    vertical-align: middle;
+  /* 登录容器固定在右上角 */
+  #auth-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 999; /* 确保在最上层，不遮挡也不被遮挡 */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  /* 后台入口样式 */
+  #admin-entrance {
+    display: none;
+    color: #000;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 10px;
+  }
+  #admin-entrance:hover {
+    text-decoration: underline;
+  }
+  /* 导航链接控制：未登录隐藏投稿 */
+  #submit-link {
+    display: none;
+  }
+  /* 页面头部预留登录空间 */
+  .header {
+    position: relative;
+    padding-top: 60px; /* 给右上角登录按钮留空间 */
   }
 </style>
 </head>
 <body>
-<!-- 顶部标题区 -->
+<!-- 顶部标题区 + 右上角登录 -->
 <header class="header">
+  <!-- 右上角登录/后台入口 -->
+  <div id="auth-container">
+    <div id="clerk-login"></div>
+    <a href="admin.html" id="admin-entrance">后台</a>
+  </div>
+
   <h1>屎记期刊 | SHIT JOURNAL</h1>
   <p class="slogan">Truth Fades, S.H.I.T Lasts. 真理会过时，构石永恒。</p>
 </header>
 
-<!-- 导航栏 -->
+<!-- 导航栏（按你的要求调整） -->
 <nav class="nav">
-  <a href="index.html">HOME</a>
-  <a href="submit.html" id="submit" style="display:none">SUBMIT 投稿</a>
-  <a href="admin.html" id="admin" style="display:none">ADMIN 后台</a>
-  <!-- Clerk登录/注册/退出组件（已加样式防遮挡） -->
-  <div id="clerk"></div>
+  <a href="index.html">HOME 主页</a>
+  <a href="submit.html" id="submit-link">SUBMIT 投稿</a>
+  <a href="community.html">COMMUNITY 社区</a>
+  <a href="paper.html">PAPER 论文</a>
+  <a href="contact.html">CONTACT US 联系我们</a>
 </nav>
 
 <!-- 核心内容区 -->
@@ -38,7 +69,6 @@
     <h2>RESEARCH ARTICLES 研究论文</h2>
     <hr>
     <div id="papers">
-      <!-- 示例稿件 -->
       <div class="paper">
         <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
         <p>作者：Dr.摸鱼达人 | DOI: 10.S.H.I.T/2026.001</p>
@@ -53,40 +83,65 @@
   <p>&copy; 2026 SHIT JOURNAL | All Rights Unreserved</p>
 </footer>
 
-<!-- Clerk初始化（修复监听+防遮挡） -->
 <script>
-// 你的Clerk Publishable Key
-const PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
-// 替换成你的管理员邮箱（必须和Clerk注册邮箱一致）
+// 1. 替换成你的管理员邮箱（必须和Clerk注册邮箱一致！）
 const ADMIN_EMAIL = "23301020010@m.fudan.edu.cn";
+// 2. Clerk密钥（无需修改）
+const CLERK_PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
 
-// 初始化Clerk并实时监听登录状态
-Clerk.load({ publishableKey: PUB_KEY }).then(() => {
-  // 渲染登录/退出按钮（限定为小型用户按钮，防遮挡）
-  Clerk.mountUserButton("#clerk", {
-    appearance: { baseTheme: 'light' }
-  });
+// 初始化Clerk
+async function initAuth() {
+  try {
+    await window.Clerk.load({ publishableKey: CLERK_PUB_KEY });
 
-  // 实时监听登录状态变化（核心修复：确保登录后链接正常显示）
-  Clerk.addListener((auth) => {
-    const submitLink = document.getElementById("submit");
-    const adminLink = document.getElementById("admin");
-    if (auth.user) {
-      // 登录后显示投稿链接
-      submitLink.style.display = "inline";
-      // 管理员邮箱显示后台链接
-      if (auth.user.emailAddresses[0]?.emailAddress === ADMIN_EMAIL) {
-        adminLink.style.display = "inline";
-      } else {
-        adminLink.style.display = "none";
+    // 渲染登录按钮（极简样式，适配右上角）
+    window.Clerk.mountUserButton("#clerk-login", {
+      appearance: {
+        baseTheme: 'light',
+        elements: {
+          userButton: { width: 'auto', height: '30px' },
+          userButtonText: { fontSize: '14px' },
+          userButtonAvatar: { display: 'none' }
+        }
       }
-    } else {
-      // 未登录隐藏所有功能链接
-      submitLink.style.display = "none";
-      adminLink.style.display = "none";
-    }
-  });
-});
+    });
+
+    // 监听登录状态，更新链接显示
+    const updateAuthUI = (auth) => {
+      const submitLink = document.getElementById('submit-link');
+      const adminEntrance = document.getElementById('admin-entrance');
+      
+      if (auth?.user) {
+        // 登录后显示投稿链接
+        submitLink.style.display = 'inline';
+        // 管理员显示后台入口（右上角）
+        const userEmail = auth.user.emailAddresses[0]?.emailAddress;
+        if (userEmail === ADMIN_EMAIL) {
+          adminEntrance.style.display = 'inline';
+        } else {
+          adminEntrance.style.display = 'none';
+        }
+      } else {
+        // 未登录隐藏投稿和后台
+        submitLink.style.display = 'none';
+        adminEntrance.style.display = 'none';
+      }
+    };
+
+    // 初始执行 + 监听变化
+    updateAuthUI(window.Clerk.auth);
+    window.Clerk.addListener(updateAuthUI);
+
+  } catch (error) {
+    // 加载失败时显示备用登录链接
+    console.error('Clerk加载失败:', error);
+    const loginContainer = document.getElementById('clerk-login');
+    loginContainer.innerHTML = '<a href="login.html" style="color: #000; text-decoration: underline; font-size:14px;">登录/注册</a>';
+  }
+}
+
+// 页面加载完成后初始化
+window.onload = initAuth;
 </script>
 </body>
 </html>

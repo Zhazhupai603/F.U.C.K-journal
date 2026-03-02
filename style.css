@@ -1,11 +1,9 @@
-/* 全局样式重置 */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* 全局字体+配色（复刻shitjournal） */
 body {
   font-family: "SimSun", "PingFang SC", "Helvetica Neue", sans-serif;
   color: #000;
@@ -16,11 +14,12 @@ body {
   padding: 0 20px;
 }
 
-/* 顶部标题区 */
+/* 头部样式：适配右上角登录 */
 .header {
   text-align: center;
-  padding: 40px 0;
+  padding: 60px 0 40px; /* 顶部留登录空间 */
   border-bottom: 1px solid #EEEEEE;
+  position: relative;
 }
 
 .header h1 {
@@ -36,7 +35,7 @@ body {
   font-style: italic;
 }
 
-/* 导航栏 */
+/* 导航栏样式：按你的要求排列 */
 .nav {
   text-align: center;
   padding: 20px 0;
@@ -47,17 +46,18 @@ body {
 .nav a {
   color: #000;
   text-decoration: none;
-  margin: 0 15px;
+  margin: 0 12px; /* 调整间距，适配多链接 */
   font-weight: bold;
   text-transform: uppercase;
   font-size: 0.9rem;
+  cursor: pointer; /* 强制手型，确保可点击 */
 }
 
 .nav a:hover {
   text-decoration: underline;
 }
 
-/* 内容区 */
+/* 内容区样式不变 */
 .content {
   margin-bottom: 50px;
 }
@@ -74,7 +74,6 @@ hr {
   margin: 10px 0 20px;
 }
 
-/* 稿件展示 */
 .paper {
   margin-bottom: 30px;
   padding-bottom: 20px;
@@ -119,7 +118,7 @@ hr {
   background: #333;
 }
 
-/* 管理员面板 */
+/* 管理员后台样式 */
 .admin-panel {
   max-width: 800px;
   margin: 50px auto;
