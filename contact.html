@@ -182,7 +182,7 @@
 <header class="header">
   <div class="container">
     <div id="auth-container">
-      <span id="loginBtn" onclick="showModal('登录后可获取专属投稿咨询服务！', '提示')">登录/注册</span>
+      <span id="loginBtn" onclick="goToLogin()">登录/注册</span>
       <span id="userName"></span>
       <span id="logoutBtn" onclick="doLogout()">退出</span>
     </div>
@@ -245,11 +245,26 @@ function hideModal() {
 // 检查登录
 function checkLogin(){
   const u = localStorage.getItem("loginUser");
+  const loginBtn = document.getElementById("loginBtn");
+  const userName = document.getElementById("userName");
+  const logoutBtn = document.getElementById("logoutBtn");
+
   if(u) {
-    document.getElementById("loginBtn").style.display="none";
-    document.getElementById("userName").innerText = u;
-    document.getElementById("logoutBtn").style.display="inline";
+    loginBtn.style.display = "none";
+    userName.style.display = "inline";
+    userName.innerText = u;
+    logoutBtn.style.display = "inline";
+  } else {
+    loginBtn.style.display = "inline";
+    userName.style.display = "none";
+    userName.innerText = "";
+    logoutBtn.style.display = "none";
   }
+}
+
+function goToLogin() {
+  localStorage.setItem("redirectAfterLogin", window.location.pathname + window.location.search);
+  window.location.href = "index.html?auth=1";
 }
 
 // 退出登录

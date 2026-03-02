@@ -211,7 +211,7 @@
 <header class="header">
   <div class="container">
     <div id="auth-container">
-      <span id="loginBtn" onclick="showModal('请先登录后再操作！', '提示')">登录/注册</span>
+      <span id="loginBtn" onclick="goToLogin()">登录/注册</span>
       <span id="userName"></span>
       <span id="logoutBtn" onclick="doLogout()">退出</span>
     </div>
@@ -261,7 +261,7 @@
 
 <script>
 // 腾讯问卷链接
-const TENCENT_FORM_URL = "https://wj.qq.com/s2/25846300/";
+const TENCENT_FORM_URL = "https://wj.qq.com/s2/25846300/285e/";
 
 // 弹窗控制
 function showModal(text, title = "提示", callback = null) {
@@ -281,12 +281,29 @@ function hideModal() {
 // 检查登录
 function checkLogin(){
   const u = localStorage.getItem("loginUser");
+  const loginBtn = document.getElementById("loginBtn");
+  const userName = document.getElementById("userName");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const loginTip = document.getElementById("loginTip");
+
   if(u) {
-    document.getElementById("loginBtn").style.display="none";
-    document.getElementById("userName").innerText = u;
-    document.getElementById("logoutBtn").style.display="inline";
-    document.getElementById("loginTip").style.display = "none"; // 隐藏未登录提示
+    loginBtn.style.display = "none";
+    userName.style.display = "inline";
+    userName.innerText = u;
+    logoutBtn.style.display = "inline";
+    loginTip.style.display = "none";
+  } else {
+    loginBtn.style.display = "inline";
+    userName.style.display = "none";
+    userName.innerText = "";
+    logoutBtn.style.display = "none";
+    loginTip.style.display = "block";
   }
+}
+
+function goToLogin() {
+  localStorage.setItem("redirectAfterLogin", window.location.pathname + window.location.search);
+  window.location.href = "index.html?auth=1";
 }
 
 // 退出登录

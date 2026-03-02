@@ -228,6 +228,88 @@
     text-transform: uppercase;
     letter-spacing: 1px;
   }
+
+  /* 首页优秀论文滚动屏 */
+  .featured-section {
+    margin-bottom: 28px;
+  }
+  .featured-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .featured-head h2 {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  .featured-tip {
+    font-size: 13px;
+    color: #6b7a89;
+  }
+  .featured-viewport {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid #ecf0f3;
+    background: #fff;
+    padding: 14px 0;
+  }
+  .featured-track {
+    display: flex;
+    gap: 16px;
+    width: max-content;
+    animation: featuredScroll 28s linear infinite;
+  }
+  .featured-viewport:hover .featured-track {
+    animation-play-state: paused;
+  }
+  .featured-card {
+    position: relative;
+    width: 280px;
+    height: 164px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(44, 62, 80, 0.14);
+    flex: 0 0 auto;
+  }
+  .featured-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s;
+  }
+  .featured-card:hover img {
+    transform: scale(1.04);
+  }
+  .featured-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: end;
+    padding: 12px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.08) 30%, rgba(0,0,0,0.75) 100%);
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.45;
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .featured-card:hover .featured-overlay,
+  .featured-card:focus-visible .featured-overlay {
+    opacity: 1;
+  }
+  .featured-card:focus-visible {
+    outline: 2px solid #e74c3c;
+    outline-offset: 3px;
+  }
+  @keyframes featuredScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
   .paper {
     padding: 30px;
     border-left: 4px solid #e74c3c;
@@ -250,6 +332,24 @@
     margin-bottom: 8px;
     line-height: 1.8;
   }
+  .paper-link {
+    display: block;
+    color: inherit;
+  }
+  .paper-link:focus-visible {
+    outline: 2px solid #e74c3c;
+    outline-offset: 4px;
+    border-radius: 10px;
+  }
+  .paper-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    color: #e74c3c;
+    font-size: 13px;
+    font-weight: 600;
+  }
 
   /* 页脚 */
   .footer {
@@ -270,6 +370,8 @@
     .section { padding: 20px; }
     .paper { padding: 20px; }
     #auth-container { top: 15px; right: 15px; font-size: 12px; }
+    .featured-card { width: 220px; height: 136px; }
+    .featured-tip { display: none; }
   }
 </style>
 </head>
@@ -339,18 +441,39 @@
 
 <main class="content">
   <div class="container">
+    <section class="section featured-section">
+      <div class="featured-head">
+        <h2>Featured Papers 优秀论文展示</h2>
+        <span class="featured-tip">悬停看标题，点击进入论文详情</span>
+      </div>
+      <div class="featured-viewport">
+        <div class="featured-track" id="featuredTrack"></div>
+      </div>
+    </section>
+
     <section class="section">
       <h2>RESEARCH ARTICLES 研究论文</h2>
       <div id="papers">
+        <a class="paper-link" href="paper-detail.html?id=10.FUCK-2026.001" aria-label="查看论文详情：基于摸鱼时长与咖啡摄入量的相关性研究">
+          <div class="paper">
+            <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
+            <p>作者：Dr.摸鱼达人 | DOI: 10.FUCK/2026.001</p>
+            <p>摘要：本研究通过对500个工位的6个月跟踪，发现工位距离咖啡机每增加1米，摸鱼频率提升12.5%，且该结论具有统计学意义（p&lt;0.0001，无实际意义）。</p>
+            <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+          </div>
+        </a>
+        <a class="paper-link" href="paper-detail.html?id=10.FUCK-2026.002" aria-label="查看论文详情：DDL截止前24小时论文完成质量研究">
+          <div class="paper">
+            <h3>DDL截止前24小时论文完成质量研究</h3>
+            <p>作者：Dr.赶due人 | DOI: 10.FUCK/2026.002</p>
+            <p>摘要：本研究分析了1000篇本科课程论文，发现DDL前24小时完成的论文，查重率平均降低8%，但错别字数量提升15%，符合「DDL奇迹定律」。</p>
+            <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+          </div>
+        </a>
         <div class="paper">
-          <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
-          <p>作者：Dr.摸鱼达人 | DOI: 10.FUCK/2026.001</p>
-          <p>摘要：本研究通过对500个工位的6个月跟踪，发现工位距离咖啡机每增加1米，摸鱼频率提升12.5%，且该结论具有统计学意义（p<0.0001，无实际意义）。</p>
-        </div>
-        <div class="paper">
-          <h3>DDL截止前24小时论文完成质量研究</h3>
-          <p>作者：Dr.赶due人 | DOI: 10.FUCK/2026.002</p>
-          <p>摘要：本研究分析了1000篇本科课程论文，发现DDL前24小时完成的论文，查重率平均降低8%，但错别字数量提升15%，符合「DDL奇迹定律」。</p>
+          <h3>微观经济学视角下的CSGO经济系统与玩家购买决策分析</h3>
+          <p>作者：找钱狼，炸猪排 | DOI: 10.FUCK/2026.004</p>
+          <p>摘要：CSGO（《反恐精英：全球攻势》）是一款团队竞技型的第一人称射击游戏，其核心玩法围绕两个对立团队——反恐精英（CT）和恐怖分子（T）之间的对抗。CSGO的经济系统是游戏策略的重要组成部分，它直接影响玩家的购买决策和团队战术的制定。从微观经济学的角度来看，CSGO的经济系统提供了一个研究个体在资源有限情况下如何做出最优决策的实验场。</p>
         </div>
       </div>
     </section>
@@ -367,6 +490,26 @@
 // SheetDB接口
 const SHEETDB_API = "https://sheetdb.io/api/v1/ev8cjfow1i90w";
 const ADMIN_USER = "admin";
+const DEFAULT_PAPERS = [
+  {
+    id: "10.FUCK-2026.001",
+    title: "基于摸鱼时长与咖啡摄入量的相关性研究",
+    pdfFile: "10.FUCK-2026.001.pdf",
+    coverImage: "assets/paper-covers/10.FUCK-2026.001.jpg"
+  },
+  {
+    id: "10.FUCK-2026.002",
+    title: "DDL截止前24小时论文完成质量研究",
+    pdfFile: "10.FUCK-2026.002.pdf",
+    coverImage: "assets/paper-covers/10.FUCK-2026.002.jpg"
+  },
+  {
+    id: "10.FUCK-2026.003",
+    title: "本科课程论文查重率与修改次数反比研究",
+    pdfFile: "10.FUCK-2026.003.pdf",
+    coverImage: "assets/paper-covers/10.FUCK-2026.003.jpg"
+  }
+];
 
 // 弹窗控制
 function showModal(text, title = "提示", callback = null) {
@@ -437,7 +580,15 @@ async function doLogin(event) {
       localStorage.setItem("loginUser", user);
       closeAuth();
       checkLogin();
-      showModal("登录成功！");
+      const redirectTo = localStorage.getItem("redirectAfterLogin");
+      if (redirectTo && redirectTo !== window.location.pathname + window.location.search) {
+        localStorage.removeItem("redirectAfterLogin");
+        showModal("登录成功，正在返回原页面...", "提示", () => {
+          window.location.href = redirectTo;
+        });
+      } else {
+        showModal("登录成功！");
+      }
     } else {
       showModal("账号或密码错误！");
     }
@@ -521,9 +672,135 @@ function doLogout(event) {
   showModal("退出成功！");
 }
 
+function createCoverPlaceholder(title) {
+  const safeTitle = String(title).replace(/[<>&"']/g, " ");
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="560" height="328">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#2c3e50"/>
+          <stop offset="100%" stop-color="#e74c3c"/>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#g)"/>
+      <text x="36" y="180" font-size="28" fill="#ffffff" font-family="Arial, sans-serif">${safeTitle.slice(0, 30)}</text>
+      <text x="36" y="220" font-size="18" fill="#f3f5f7" font-family="Arial, sans-serif">F.U.C.K Featured Paper</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function normalizePaperItem(item) {
+  const id = String(item.id || "").trim();
+  const title = String(item.title || id || "Untitled Paper").trim();
+  const pdfFile = String(item.pdfFile || `${id}.pdf`).trim();
+  const coverImage = String(item.coverImage || `assets/paper-covers/${id}.jpg`).trim();
+  return { id, title, pdfFile, coverImage };
+}
+
+async function loadPaperCatalog() {
+  try {
+    const res = await fetch(`papers/papers.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error("catalog not found");
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error("empty catalog");
+    return data.map(normalizePaperItem).filter((p) => p.id);
+  } catch (error) {
+    console.warn("Use default paper catalog:", error);
+    return DEFAULT_PAPERS.map(normalizePaperItem);
+  }
+}
+
+function normalizeFeaturedItem(item) {
+  if (typeof item === "string") {
+    return { id: item.trim() };
+  }
+  return {
+    id: String(item.id || "").trim(),
+    title: item.title ? String(item.title).trim() : "",
+    coverImage: item.coverImage ? String(item.coverImage).trim() : ""
+  };
+}
+
+async function loadFeaturedPapers(papers) {
+  try {
+    const res = await fetch(`papers/featured.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error("featured config not found");
+    const config = await res.json();
+    if (!Array.isArray(config) || config.length === 0) throw new Error("empty featured config");
+
+    const paperMap = new Map(papers.map((paper) => [paper.id, paper]));
+    const picked = config
+      .map(normalizeFeaturedItem)
+      .map((item) => {
+        const base = paperMap.get(item.id);
+        if (!base) return null;
+        return {
+          ...base,
+          title: item.title || base.title,
+          coverImage: item.coverImage || base.coverImage
+        };
+      })
+      .filter(Boolean);
+
+    if (picked.length === 0) throw new Error("no matched featured papers");
+    return picked;
+  } catch (error) {
+    console.warn("Use default featured papers:", error);
+    return papers.slice(0, Math.min(3, papers.length));
+  }
+}
+
+function renderPaperList(papers) {
+  const papersRoot = document.getElementById("papers");
+  if (!papersRoot) return;
+
+  papersRoot.innerHTML = papers.map((paper) => `
+    <a class="paper-link" href="paper-detail.html?id=${paper.id}" aria-label="查看论文详情：${paper.title}">
+      <div class="paper">
+        <h3>${paper.title}</h3>
+        <p>DOI / ID：${paper.id}</p>
+        <p>摘要：已收录至期刊系统，点击查看详情与下载全文。</p>
+        <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+      </div>
+    </a>
+  `).join("");
+}
+
+function renderFeaturedCarousel(papers) {
+  const track = document.getElementById("featuredTrack");
+  if (!track) return;
+
+  const renderSet = papers.concat(papers);
+  track.innerHTML = renderSet.map((paper) => `
+    <a class="featured-card" href="paper-detail.html?id=${paper.id}" aria-label="查看论文详情：${paper.title}">
+      <img src="${paper.coverImage}" alt="${paper.title}" data-title="${paper.title}" loading="lazy">
+      <span class="featured-overlay">${paper.title}</span>
+    </a>
+  `).join("");
+
+  track.querySelectorAll("img").forEach((img) => {
+    img.addEventListener("error", () => {
+      img.src = createCoverPlaceholder(img.dataset.title || "Featured Paper");
+    }, { once: true });
+  });
+}
+
+async function initPaperShowcase() {
+  const papers = await loadPaperCatalog();
+  const featured = await loadFeaturedPapers(papers);
+  renderPaperList(papers);
+  renderFeaturedCarousel(featured);
+}
+
 // 页面初始化
 document.addEventListener("DOMContentLoaded", function() {
   checkLogin();
+  initPaperShowcase();
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("auth") === "1" && !localStorage.getItem("loginUser")) {
+    openAuth();
+  }
   document.getElementById("authModal").addEventListener('click', function(e) {
     if (e.target === this) closeAuth(e);
   });

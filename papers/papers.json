@@ -1,0 +1,39 @@
+[
+  {
+    "id": "10.FUCK-2026.001",
+    "title": "基于摸鱼时长与咖啡摄入量的相关性研究",
+    "pdfFile": "10.FUCK-2026.001.pdf",
+    "coverImage": "assets/paper-covers/10.FUCK-2026.001.jpg"
+  },
+  {
+    "id": "10.FUCK-2026.002",
+    "title": "DDL截止前24小时论文完成质量研究",
+    "pdfFile": "10.FUCK-2026.002.pdf",
+    "coverImage": "assets/paper-covers/10.FUCK-2026.002.jpg"
+  },
+  {
+    "id": "10.FUCK-2026.003",
+    "title": "本科课程论文查重率与修改次数反比研究",
+    "pdfFile": "10.FUCK-2026.003.pdf",
+    "coverImage": "assets/paper-covers/10.FUCK-2026.003.jpg"
+  },
+  {
+    "id": "10.FUCK-2026.004",
+    "title": "微观经济学视角下的CSGO经济系统与玩家购买决策分析",
+    "pdfFile": "10.FUCK-2026.004.pdf",
+    "coverImage": "assets/paper-covers/10.FUCK-2026.004.jpg",
+    "authors": "找钱狼，炸猪排",
+    "doi": "10.FUCK/2026.004",
+    "date": "2026-03-03",
+    "volume": "Vol. 1, Issue 2",
+    "abstract": "CSGO（《反恐精英：全球攻势》）是一款团队竞技型的第一人称射击游戏，其核心玩法围绕两个对立团队——反恐精英（CT）和恐怖分子（T）之间的对抗。CSGO的经济系统是游戏策略的重要组成部分，它直接影响玩家的购买决策和团队战术的制定。从微观经济学的角度来看，CSGO的经济系统提供了一个研究个体在资源有限情况下如何做出最优决策的实验场。",
+    "keywords": [
+      "CSGO",
+      "经济学"
+    ],
+    "affiliation": "国际关系与公共事务学院",
+    "titleEn": "",
+    "abstractEn": "",
+    "keywordsEn": ""
+  }
+]

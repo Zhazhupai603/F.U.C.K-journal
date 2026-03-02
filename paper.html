@@ -142,6 +142,21 @@
     background:#f9f9f9;
     border-radius:0 6px 6px 0;
     margin-bottom:15px;
+    transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+  }
+  .paper-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(44, 62, 80, 0.12);
+    background: #ffffff;
+  }
+  .paper-item-link {
+    display: block;
+    color: inherit;
+  }
+  .paper-item-link:focus-visible {
+    outline: 2px solid #e74c3c;
+    outline-offset: 4px;
+    border-radius: 8px;
   }
   .paper-item h3 {
     font-size:1.2rem;
@@ -149,6 +164,16 @@
     color:#2c3e50;
   }
   .paper-item p { color:#666; font-size:14px; }
+  .paper-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    color: #e74c3c;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+  }
 
   /* 页脚 */
   .footer {
@@ -189,7 +214,7 @@
 <header class="header">
   <div class="container">
     <div id="auth-container">
-      <span id="loginBtn" onclick="showModal('登录后可查看更多论文内容！', '提示')">登录/注册</span>
+      <span id="loginBtn" onclick="goToLogin()">登录/注册</span>
       <span id="userName"></span>
       <span id="logoutBtn" onclick="doLogout()">退出</span>
     </div>
@@ -218,18 +243,34 @@
   <div class="container">
     <section class="section">
       <h2>Published Papers 已发表论文</h2>
-      <div class="paper-item">
-        <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
-        <p>作者：Dr.摸鱼达人 | DOI: 10.FUCK/2026.001</p>
-      </div>
-      <div class="paper-item">
-        <h3>DDL截止前24小时论文完成质量研究</h3>
-        <p>作者：Dr.赶due人 | DOI: 10.FUCK/2026.002</p>
-      </div>
-      <div class="paper-item">
-        <h3>本科课程论文查重率与修改次数反比研究</h3>
-        <p>作者：Dr.降重大师 | DOI: 10.FUCK/2026.003</p>
-      </div>
+      <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.001" aria-label="查看论文详情：基于摸鱼时长与咖啡摄入量的相关性研究">
+        <div class="paper-item">
+          <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
+          <p>作者：Dr.摸鱼达人 | DOI: 10.FUCK/2026.001</p>
+          <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+        </div>
+      </a>
+      <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.002" aria-label="查看论文详情：DDL截止前24小时论文完成质量研究">
+        <div class="paper-item">
+          <h3>DDL截止前24小时论文完成质量研究</h3>
+          <p>作者：Dr.赶due人 | DOI: 10.FUCK/2026.002</p>
+          <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+        </div>
+      </a>
+      <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.003" aria-label="查看论文详情：本科课程论文查重率与修改次数反比研究">
+        <div class="paper-item">
+          <h3>本科课程论文查重率与修改次数反比研究</h3>
+          <p>作者：Dr.降重大师 | DOI: 10.FUCK/2026.003</p>
+          <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+        </div>
+      </a>
+      <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.004" aria-label="查看论文详情：微观经济学视角下的CSGO经济系统与玩家购买决策分析">
+        <div class="paper-item">
+          <h3>微观经济学视角下的CSGO经济系统与玩家购买决策分析</h3>
+          <p>作者：找钱狼，炸猪排 | DOI: 10.FUCK/2026.004</p>
+          <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+        </div>
+      </a>
     </section>
   </div>
 </main>
@@ -259,11 +300,26 @@ function hideModal() {
 // 检查登录
 function checkLogin(){
   const u = localStorage.getItem("loginUser");
+  const loginBtn = document.getElementById("loginBtn");
+  const userName = document.getElementById("userName");
+  const logoutBtn = document.getElementById("logoutBtn");
+
   if(u) {
-    document.getElementById("loginBtn").style.display="none";
-    document.getElementById("userName").innerText = u;
-    document.getElementById("logoutBtn").style.display="inline";
+    loginBtn.style.display = "none";
+    userName.style.display = "inline";
+    userName.innerText = u;
+    logoutBtn.style.display = "inline";
+  } else {
+    loginBtn.style.display = "inline";
+    userName.style.display = "none";
+    userName.innerText = "";
+    logoutBtn.style.display = "none";
   }
+}
+
+function goToLogin() {
+  localStorage.setItem("redirectAfterLogin", window.location.pathname + window.location.search);
+  window.location.href = "index.html?auth=1";
 }
 
 // 退出登录

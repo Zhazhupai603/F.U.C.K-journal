@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F.U.C.K | Paper Detail</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Roboto', 'Noto Serif SC', serif; color:#333; background:#f8f9fa; line-height:1.6; }
+  a { text-decoration:none; color:#2c3e50; transition:all 0.3s; }
+  .container { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.65);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal.active { display: flex; }
+  .modal-box {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    padding: 40px 35px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    text-align: center;
+    position: relative;
+  }
+  .modal-box h3 { font-size: 1.25rem; margin-bottom: 12px; color: #2c3e50; }
+  .modal-box p { font-size: 0.95rem; color: #666; margin-bottom: 25px; line-height: 1.6; }
+  .modal-box .btn {
+    padding: 10px 24px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    margin: 0 6px;
+  }
+  .btn-confirm { background: #e74c3c; color: white; }
+  .btn-cancel { background: #eee; color: #333; }
+
+  #auth-container {
+    position: absolute;
+    top: 25px;
+    right: 30px;
+    z-index: 999;
+    display: flex;
+    gap: 15px;
+    font-size: 14px;
+  }
+  #loginBtn { cursor:pointer; text-decoration:underline; color:#e74c3c; }
+  #userName { color:#2c3e50; font-weight:500; }
+  #logoutBtn { cursor:pointer; text-decoration:underline; color:#e74c3c; display:none; }
+
+  .header {
+    position:relative;
+    padding: 60px 0 30px;
+    background:#fff;
+    border-bottom:1px solid #eee;
+    text-align:center;
+  }
+  .journal-logo {
+    font-size:3rem;
+    font-weight:700;
+    margin-bottom:10px;
+    letter-spacing: 0;
+  }
+  .journal-logo span {
+    color:#e74c3c;
+    font-weight:900;
+    font-size:3.2rem;
+  }
+  .journal-fullname {
+    font-size:1.1rem;
+    color:#666;
+    margin-bottom:15px;
+    font-style:italic;
+  }
+  .highlight-letter {
+    color: #e74c3c;
+    font-weight: 900;
+    font-size: 1.4rem;
+  }
+  .slogan {
+    font-size:1.2rem;
+    color:#2c3e50;
+    font-weight:500;
+    margin-top:5px;
+  }
+
+  .nav {
+    background-color: #2c3e50;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+  .nav a {
+    color: #fff;
+    padding: 10px 20px;
+    margin: 0 5px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+  .nav a:hover { background-color: #e74c3c; color: #fff; }
+
+  .content { padding:50px 0; }
+  .paper-hero {
+    background: linear-gradient(125deg, #ffffff 0%, #f8f9fa 75%, #fceae8 100%);
+    padding: 36px;
+    border-radius: 14px;
+    border: 1px solid #f0e0de;
+    box-shadow: 0 10px 28px rgba(44,62,80,0.08);
+    margin-bottom: 20px;
+  }
+  .paper-category {
+    display: inline-block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #e74c3c;
+    border: 1px solid #e9b4ac;
+    border-radius: 999px;
+    padding: 5px 12px;
+    margin-bottom: 14px;
+    background: #fff;
+  }
+  .paper-title {
+    font-size: 2rem;
+    line-height: 1.35;
+    margin-bottom: 16px;
+    color: #233447;
+  }
+  .paper-authors {
+    color: #4d5f70;
+    font-size: 1.02rem;
+    margin-bottom: 14px;
+  }
+  .paper-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: #5d6f80;
+    font-size: 14px;
+  }
+  .paper-meta span {
+    background: rgba(255,255,255,0.86);
+    border: 1px solid #e8edf3;
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  .paper-cover {
+    margin-top: 18px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e4eaf1;
+    background: #f4f7fa;
+    box-shadow: 0 6px 18px rgba(44, 62, 80, 0.12);
+  }
+  .paper-cover img {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .paper-body {
+    background:#fff;
+    padding:36px;
+    border-radius:12px;
+    box-shadow:0 2px 20px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+  }
+  .paper-section {
+    margin-bottom: 28px;
+  }
+  .paper-section:last-child { margin-bottom: 0; }
+  .paper-section h2 {
+    font-size: 1.15rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #2c3e50;
+    border-bottom: 2px solid #edf1f5;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+  .paper-section p {
+    font-size: 1rem;
+    color: #4a5b6a;
+    line-height: 1.85;
+  }
+  .keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .keywords span {
+    font-size: 13px;
+    background: #f5f8fb;
+    border: 1px solid #e2e8ef;
+    color: #415465;
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  .paper-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .paper-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .paper-btn.primary {
+    background: #e74c3c;
+    color: #fff;
+  }
+  .paper-btn.primary:hover { background: #c0392b; }
+  .paper-btn.secondary {
+    background: #fff;
+    border-color: #d6dde5;
+    color: #34495e;
+  }
+  .paper-btn.secondary:hover { background: #f5f8fb; }
+
+  .footer {
+    text-align:center;
+    padding:40px 0;
+    background:#2c3e50;
+    color:#fff;
+    margin-top:50px;
+  }
+  .footer p {
+    font-size:14px;
+    opacity:0.8;
+  }
+
+  @media (max-width: 768px) {
+    .journal-logo { font-size:2rem; }
+    .journal-logo span { font-size:2.2rem; }
+    .highlight-letter { font-size:1.2rem; }
+    .nav a { padding:8px 12px; font-size:12px; margin:0 2px; }
+    #auth-container { top:15px; right:15px; font-size:12px; }
+    .paper-hero, .paper-body { padding: 22px; }
+    .paper-title { font-size: 1.45rem; }
+  }
+</style>
+</head>
+<body>
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3 id="modalTitle">提示</h3>
+    <p id="modalText">消息内容</p>
+    <button class="btn btn-cancel" onclick="hideModal()">取消</button>
+    <button class="btn btn-confirm" id="modalOkBtn" onclick="hideModal()">确定</button>
+  </div>
+</div>
+
+<header class="header">
+  <div class="container">
+    <div id="auth-container">
+      <span id="loginBtn" onclick="goToLogin()">登录/注册</span>
+      <span id="userName"></span>
+      <span id="logoutBtn" onclick="doLogout()">退出</span>
+    </div>
+    <div class="journal-logo">F<span>.</span>U<span>.</span>C<span>.</span>K</div>
+    <div class="journal-fullname">
+      <span class="highlight-letter">F</span>udan
+      <span class="highlight-letter">U</span>ndergraduate
+      <span class="highlight-letter">C</span>ourse-wor<span class="highlight-letter">K</span>
+    </div>
+    <p class="slogan">每一篇，都是DDL的奇迹</p>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="container">
+    <a href="index.html">HOME 主页</a>
+    <a href="submit.html">SUBMIT 投稿</a>
+    <a href="community.html">COMMUNITY 社区</a>
+    <a href="paper.html">PAPER 论文</a>
+    <a href="contact.html">CONTACT 联系我们</a>
+  </div>
+</nav>
+
+<main class="content">
+  <div class="container">
+    <section class="paper-hero">
+      <span class="paper-category">Research Article</span>
+      <h1 class="paper-title" id="paperTitle">加载中...</h1>
+      <p class="paper-authors" id="paperAuthors"></p>
+      <div class="paper-meta">
+        <span id="paperDoi">DOI: -</span>
+        <span id="paperDate">Published: -</span>
+        <span id="paperVolume">Volume: -</span>
+      </div>
+      <div class="paper-cover">
+        <img id="paperCover" src="" alt="论文头图">
+      </div>
+    </section>
+
+    <section class="paper-body">
+      <article class="paper-section">
+        <h2>Abstract 摘要</h2>
+        <p id="paperAbstract"></p>
+      </article>
+
+      <article class="paper-section">
+        <h2>Keywords 关键词</h2>
+        <div class="keywords" id="paperKeywords"></div>
+      </article>
+
+      <article class="paper-section">
+        <h2>Article Actions</h2>
+        <div class="paper-actions">
+          <button class="paper-btn primary" type="button" onclick="downloadCurrentPaperPdf()">
+            <i class="bi bi-download"></i>
+            Download PDF
+          </button>
+          <button class="paper-btn secondary" type="button" onclick="downloadCurrentPaper()">
+            <i class="bi bi-filetype-txt"></i>
+            Download TXT
+          </button>
+          <a class="paper-btn secondary" href="paper.html">
+            <i class="bi bi-arrow-left"></i>
+            Back to Papers
+          </a>
+        </div>
+      </article>
+    </section>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2026 F.U.C.K | <span class="highlight-letter">F</span>udan <span class="highlight-letter">U</span>ndergraduate <span class="highlight-letter">C</span>ourse-wor<span class="highlight-letter">K</span> | 每一篇，都是DDL的奇迹</p>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+const PAPER_DATA = {
+  "10.FUCK-2026.001": {
+    title: "基于摸鱼时长与咖啡摄入量的相关性研究",
+    authors: "Dr.摸鱼达人, 王同学, 李同学",
+    doi: "10.FUCK/2026.001",
+    date: "2026-01-15",
+    volume: "Vol. 1, Issue 1",
+    pdfFile: "10.FUCK-2026.001.pdf",
+    coverImage: "assets/paper-covers/10.FUCK-2026.001.jpg",
+    abstract: "本研究通过对500个工位进行连续6个月追踪，记录日均咖啡摄入量、摸鱼持续时间与提交质量评分。结果表明，咖啡摄入在短期内提升了任务启动速度，但在连续高摄入情况下，会显著提高无效浏览行为比例。",
+    method: "研究使用分层抽样设计，在不同学院中抽取受试样本。通过浏览行为日志与问卷双轨验证，结合线性混合模型剔除课程难度与队友水平等干扰项。",
+    conclusion: "咖啡并非摸鱼的直接成因，但会放大DDL压力下的注意力漂移。建议将摄入窗口控制在提交前6小时，并搭配番茄钟策略以减少认知波动。",
+    keywords: ["咖啡因", "学习行为", "摸鱼", "本科论文", "时间管理"]
+  },
+  "10.FUCK-2026.002": {
+    title: "DDL截止前24小时论文完成质量研究",
+    authors: "Dr.赶due人, 陈同学, 赵同学",
+    doi: "10.FUCK/2026.002",
+    date: "2026-01-22",
+    volume: "Vol. 1, Issue 1",
+    pdfFile: "10.FUCK-2026.002.pdf",
+    coverImage: "assets/paper-covers/10.FUCK-2026.002.jpg",
+    abstract: "本研究分析1000篇本科课程论文及其提交时间戳，评估不同完稿时间窗口对文字质量、结构完整度与查重结果的影响。结果显示，临近DDL完稿组在结构创新性上更高，但语法错误和引用格式错误显著增加。",
+    method: "数据来自匿名课程平台导出记录，采用文本可读性指标、引用规范评分与教师盲评结果进行多指标交叉。研究使用Logistic回归评估完稿时间窗口与高分概率之间的关系。",
+    conclusion: "DDL压力可能激活短时高强度创作能力，但无法替代前期资料整理。建议在DDL前24小时仅完成润色与结构修订，将核心论证提前至48小时完成。",
+    keywords: ["DDL", "写作质量", "论文评分", "时间窗口", "课程作业"]
+  },
+  "10.FUCK-2026.003": {
+    title: "本科课程论文查重率与修改次数反比研究",
+    authors: "Dr.降重大师, 周同学, 孙同学",
+    doi: "10.FUCK/2026.003",
+    date: "2026-02-03",
+    volume: "Vol. 1, Issue 2",
+    pdfFile: "10.FUCK-2026.003.pdf",
+    coverImage: "assets/paper-covers/10.FUCK-2026.003.jpg",
+    abstract: "研究统计了800篇课程论文的修改历史与最终查重率，发现当有效修改次数超过5次后，查重率下降趋势趋于稳定，说明内容重构比简单同义词替换更能改善原创性表现。",
+    method: "通过版本对比工具提取编辑差异，区分表层替换与深层重写。利用分段回归模型验证修改次数与查重率关系，并对专业差异进行稳健性检验。",
+    conclusion: "降低查重率的关键在于论证路径重构与案例更新，而非词汇层面的机械变换。建议建立“结构-论据-表达”三阶段修改清单，提高改稿效率。",
+    keywords: ["查重", "文本重写", "写作方法", "论文修改", "原创性"]
+  }
+};
+
+let currentPaperId = "";
+let currentPaperData = null;
+const PDF_STORAGE_DIR = "papers";
+const DEFAULT_PAPER_TEMPLATE = {
+  authors: "F.U.C.K Journal Editorial Team",
+  date: "2026-01-01",
+  volume: "Vol. 1",
+  abstract: "该论文已收录。详细摘要可在后续版本补充。",
+  keywords: ["F.U.C.K", "Paper", "Undergraduate"]
+};
+
+function showModal(text, title = "提示", callback = null) {
+  document.getElementById("modalTitle").innerText = title;
+  document.getElementById("modalText").innerText = text;
+  document.getElementById("modal").classList.add("active");
+  const okBtn = document.getElementById("modalOkBtn");
+  okBtn.onclick = () => {
+    hideModal();
+    if (callback) callback();
+  };
+}
+
+function hideModal() {
+  document.getElementById("modal").classList.remove("active");
+}
+
+function checkLogin(){
+  const u = localStorage.getItem("loginUser");
+  const loginBtn = document.getElementById("loginBtn");
+  const userName = document.getElementById("userName");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if(u) {
+    loginBtn.style.display = "none";
+    userName.style.display = "inline";
+    userName.innerText = u;
+    logoutBtn.style.display = "inline";
+  } else {
+    loginBtn.style.display = "inline";
+    userName.style.display = "none";
+    userName.innerText = "";
+    logoutBtn.style.display = "none";
+  }
+}
+
+function doLogout() {
+  localStorage.removeItem("loginUser");
+  checkLogin();
+  showModal("退出成功！");
+}
+
+function goToLogin() {
+  localStorage.setItem("redirectAfterLogin", window.location.pathname + window.location.search);
+  window.location.href = "index.html?auth=1";
+}
+
+function buildPaperDownloadText(paper) {
+  return [
+    "F.U.C.K Journal - Full Text",
+    "========================================",
+    `Title: ${paper.title}`,
+    `Author(s): ${paper.authors}`,
+    `DOI: ${paper.doi}`,
+    `Published: ${paper.date}`,
+    `Volume: ${paper.volume}`,
+    "",
+    "Abstract",
+    "----------------------------------------",
+    paper.abstract,
+    "",
+    `Keywords: ${paper.keywords.join(", ")}`,
+    "",
+    "Copyright © 2026 F.U.C.K Journal"
+  ].join("\n");
+}
+
+function createCoverPlaceholder(title) {
+  const safeTitle = String(title).replace(/[<>&"']/g, " ");
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#243647"/>
+          <stop offset="100%" stop-color="#e74c3c"/>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#g)"/>
+      <text x="62" y="330" font-size="46" fill="#ffffff" font-family="Arial, sans-serif">${safeTitle.slice(0, 42)}</text>
+      <text x="62" y="388" font-size="24" fill="#f5f8fb" font-family="Arial, sans-serif">Paper Cover Placeholder</text>
+    </svg>
+  `;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function applyPaperCover(paper) {
+  const cover = document.getElementById("paperCover");
+  cover.alt = `${paper.title} 头图`;
+  cover.src = paper.coverImage || createCoverPlaceholder(paper.title);
+  cover.onerror = function onCoverError() {
+    cover.onerror = null;
+    cover.src = createCoverPlaceholder(paper.title);
+  };
+}
+
+function normalizeCatalogPaper(item) {
+  const id = String(item.id || "").trim();
+  const title = String(item.title || id || "Untitled Paper").trim();
+  const pdfFile = String(item.pdfFile || `${id}.pdf`).trim();
+  const coverImage = String(item.coverImage || `assets/paper-covers/${id}.jpg`).trim();
+  const doi = String(item.doi || id).trim();
+  const authors = String(item.authors || "").trim();
+  const date = String(item.date || "").trim();
+  const volume = String(item.volume || "").trim();
+  const abstract = String(item.abstract || "").trim();
+  const keywords = Array.isArray(item.keywords)
+    ? item.keywords.map((k) => String(k).trim()).filter(Boolean)
+    : [];
+  return { id, title, pdfFile, coverImage, doi, authors, date, volume, abstract, keywords };
+}
+
+async function loadPaperCatalog() {
+  try {
+    const res = await fetch(`papers/papers.json?t=${Date.now()}`);
+    if (!res.ok) throw new Error("catalog not found");
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error("invalid catalog");
+    return data.map(normalizeCatalogPaper).filter((paper) => paper.id);
+  } catch (error) {
+    console.warn("paper catalog load failed:", error);
+    return [];
+  }
+}
+
+function buildPaperFromCatalog(catalogPaper) {
+  return {
+    title: catalogPaper.title,
+    authors: catalogPaper.authors || DEFAULT_PAPER_TEMPLATE.authors,
+    doi: catalogPaper.doi || catalogPaper.id,
+    date: catalogPaper.date || DEFAULT_PAPER_TEMPLATE.date,
+    volume: catalogPaper.volume || DEFAULT_PAPER_TEMPLATE.volume,
+    pdfFile: catalogPaper.pdfFile,
+    coverImage: catalogPaper.coverImage,
+    abstract: catalogPaper.abstract || DEFAULT_PAPER_TEMPLATE.abstract,
+    keywords: (catalogPaper.keywords && catalogPaper.keywords.length)
+      ? catalogPaper.keywords
+      : DEFAULT_PAPER_TEMPLATE.keywords
+  };
+}
+
+function downloadCurrentPaper() {
+  if (!localStorage.getItem("loginUser")) {
+    showModal("请先登录后再下载论文。", "未登录");
+    return;
+  }
+
+  const paper = currentPaperData;
+  if (!paper) {
+    showModal("未找到论文内容，无法下载。", "下载失败");
+    return;
+  }
+
+  const content = buildPaperDownloadText(paper);
+  const blob = new Blob(["\ufeff", content], { type: "text/plain;charset=utf-8" });
+  const downloadUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = downloadUrl;
+  anchor.download = `${paper.doi.replace(/\//g, "-")}.txt`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(downloadUrl);
+
+  showModal("论文全文已开始下载（TXT）。", "下载成功");
+}
+
+async function downloadCurrentPaperPdf() {
+  if (!localStorage.getItem("loginUser")) {
+    showModal("请先登录后再下载论文。", "未登录");
+    return;
+  }
+
+  const paper = currentPaperData;
+  if (!paper) {
+    showModal("未找到论文内容，无法下载。", "下载失败");
+    return;
+  }
+
+  if (paper.pdfFile) {
+    const pdfPath = `${PDF_STORAGE_DIR}/${paper.pdfFile}`;
+    const directOk = await tryDirectPdfDownload(pdfPath, `${paper.doi.replace(/\//g, "-")}.pdf`);
+    if (directOk) {
+      showModal("已下载你上传的原始 PDF。", "下载成功");
+      return;
+    }
+  }
+
+  if (typeof html2pdf === "undefined") {
+    showModal("未找到原始 PDF，且 PDF 组件加载失败。请检查 papers 目录或刷新重试。", "下载失败");
+    return;
+  }
+
+  const temp = document.createElement("div");
+  temp.style.width = "794px";
+  temp.style.padding = "48px";
+  temp.style.background = "#ffffff";
+  temp.style.color = "#1f2d3a";
+  temp.style.fontFamily = "'Noto Serif SC', 'Roboto', serif";
+  temp.style.lineHeight = "1.8";
+
+  temp.innerHTML = `
+    <div style="border-bottom:2px solid #e8edf3; padding-bottom:16px; margin-bottom:20px;">
+      <div style="font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#e74c3c; margin-bottom:8px;">F.U.C.K Journal</div>
+      <h1 style="font-size:24px; margin:0 0 10px; color:#233447;">${paper.title}</h1>
+      <p style="margin:0 0 6px; font-size:14px;"><strong>Author(s):</strong> ${paper.authors}</p>
+      <p style="margin:0; font-size:14px;"><strong>DOI:</strong> ${paper.doi} | <strong>Published:</strong> ${paper.date} | <strong>${paper.volume}</strong></p>
+    </div>
+    <section style="margin-bottom:18px;">
+      <h2 style="font-size:16px; margin:0 0 8px; color:#2c3e50;">Abstract 摘要</h2>
+      <p style="margin:0; font-size:14px;">${paper.abstract}</p>
+    </section>
+    <section>
+      <h2 style="font-size:16px; margin:0 0 8px; color:#2c3e50;">Keywords 关键词</h2>
+      <p style="margin:0; font-size:14px;">${paper.keywords.join("，")}</p>
+    </section>
+  `;
+
+  document.body.appendChild(temp);
+
+  const opt = {
+    margin: [10, 10, 10, 10],
+    filename: `${paper.doi.replace(/\//g, "-")}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    pagebreak: { mode: ["css", "legacy"] }
+  };
+
+  try {
+    await html2pdf().set(opt).from(temp).save();
+    showModal("未检测到原始 PDF，已使用页面内容生成 PDF 下载。", "下载成功");
+  } catch (error) {
+    console.error("PDF下载失败：", error);
+    showModal("PDF 下载失败，请稍后重试。", "下载失败");
+  } finally {
+    temp.remove();
+  }
+}
+
+async function tryDirectPdfDownload(pdfPath, downloadName) {
+  try {
+    const headRes = await fetch(pdfPath, { method: "HEAD" });
+    if (!headRes.ok) return false;
+
+    const anchor = document.createElement("a");
+    anchor.href = pdfPath;
+    anchor.download = downloadName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    return true;
+  } catch (error) {
+    console.error("原始 PDF 检测失败：", error);
+    return false;
+  }
+}
+
+async function renderPaperDetail() {
+  const params = new URLSearchParams(window.location.search);
+  const paperId = params.get("id");
+  const catalog = await loadPaperCatalog();
+  const catalogPaper = catalog.find((paper) => paper.id === paperId);
+  const presetPaper = PAPER_DATA[paperId] || null;
+  const catalogFullPaper = catalogPaper ? buildPaperFromCatalog(catalogPaper) : null;
+  const paper = presetPaper
+    ? { ...presetPaper, ...(catalogFullPaper || {}) }
+    : catalogFullPaper;
+
+  if (!paper) {
+    showModal("论文不存在或链接已失效，即将返回论文页。", "未找到论文", () => {
+      window.location.href = "paper.html";
+    });
+    return;
+  }
+
+  currentPaperId = paperId;
+  currentPaperData = paper;
+  document.title = `F.U.C.K | ${paper.title}`;
+  document.getElementById("paperTitle").innerText = paper.title;
+  document.getElementById("paperAuthors").innerText = `Author(s): ${paper.authors}`;
+  document.getElementById("paperDoi").innerText = `DOI: ${paper.doi}`;
+  document.getElementById("paperDate").innerText = `Published: ${paper.date}`;
+  document.getElementById("paperVolume").innerText = paper.volume;
+  document.getElementById("paperAbstract").innerText = paper.abstract;
+  applyPaperCover(paper);
+
+  const keywordsNode = document.getElementById("paperKeywords");
+  keywordsNode.innerHTML = "";
+  paper.keywords.forEach((word) => {
+    const chip = document.createElement("span");
+    chip.innerText = word;
+    keywordsNode.appendChild(chip);
+  });
+}
+
+window.addEventListener("DOMContentLoaded", function () {
+  checkLogin();
+  renderPaperDetail();
+});
+</script>
+</body>
+</html>
