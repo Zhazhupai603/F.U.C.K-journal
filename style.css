@@ -1,0 +1,127 @@
+/* 全局样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* 全局字体+配色（复刻shitjournal） */
+body {
+  font-family: "SimSun", "PingFang SC", "Helvetica Neue", sans-serif;
+  color: #000;
+  background-color: #FFF;
+  line-height: 1.8;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 顶部标题区 */
+.header {
+  text-align: center;
+  padding: 40px 0;
+  border-bottom: 1px solid #EEEEEE;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.slogan {
+  font-size: 1.1rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* 导航栏 */
+.nav {
+  text-align: center;
+  padding: 20px 0;
+  border-bottom: 1px solid #EEEEEE;
+  margin-bottom: 30px;
+}
+
+.nav a {
+  color: #000;
+  text-decoration: none;
+  margin: 0 15px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+}
+
+/* 内容区 */
+.content {
+  margin-bottom: 50px;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #EEEEEE;
+  margin: 10px 0 20px;
+}
+
+/* 稿件展示 */
+.paper {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px dashed #EEEEEE;
+}
+
+.paper h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+/* 表单/按钮样式 */
+.form-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 30px;
+  border: 1px solid #EEEEEE;
+}
+
+.form-title {
+  text-align: center;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: #000;
+  color: #FFF;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #333;
+}
+
+/* 管理员面板 */
+.admin-panel {
+  max-width: 800px;
+  margin: 50px auto;
+  padding: 0 20px;
+}

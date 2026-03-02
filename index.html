@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>屎记期刊 | SHIT JOURNAL</title>
+<link rel="stylesheet" href="style.css">
+<!-- 集成Clerk登录组件 -->
+<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
+</head>
+<body>
+<!-- 顶部标题区 -->
+<header class="header">
+  <h1>屎记期刊 | SHIT JOURNAL</h1>
+  <p class="slogan">Truth Fades, S.H.I.T Lasts. 真理会过时，构石永恒。</p>
+</header>
+
+<!-- 导航栏 -->
+<nav class="nav">
+  <a href="index.html">HOME</a>
+  <a href="submit.html" id="submit" style="display:none">SUBMIT 投稿</a>
+  <a href="admin.html" id="admin" style="display:none">ADMIN 后台</a>
+  <!-- Clerk登录/注册/退出组件 -->
+  <div id="clerk"></div>
+</nav>
+
+<!-- 核心内容区 -->
+<main class="content">
+  <section class="section">
+    <h2>RESEARCH ARTICLES 研究论文</h2>
+    <hr>
+    <div id="papers">
+      <!-- 示例稿件 -->
+      <div class="paper">
+        <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
+        <p>作者：Dr.摸鱼达人 | DOI: 10.S.H.I.T/2026.001</p>
+        <p>摘要：本研究通过对500个工位的6个月跟踪，发现工位距离咖啡机每增加1米，摸鱼频率提升12.5%，且该结论具有统计学意义（p<0.0001，无实际意义）。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- 底部 -->
+<footer class="footer" style="text-align: center; padding: 30px 0; border-top: 1px solid #eee; margin-top: 50px;">
+  <p>&copy; 2026 SHIT JOURNAL | All Rights Unreserved</p>
+</footer>
+
+<!-- Clerk初始化（已填你的密钥） -->
+<script>
+// 你的Clerk Publishable Key
+const PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
+// 替换成你的管理员邮箱（比如 your@email.com）
+const ADMIN_EMAIL = "你的管理员邮箱@xxx.com";
+
+// 初始化Clerk登录
+Clerk.load({ publishableKey: PUB_KEY }).then(() => {
+  // 渲染登录/退出按钮
+  Clerk.mountUserButton("#clerk");
+
+  // 监听登录状态
+  if (Clerk.user) {
+    // 登录后显示投稿链接
+    document.getElementById("submit").style.display = "inline";
+    // 管理员显示后台链接
+    if (Clerk.user.emailAddresses[0]?.emailAddress === ADMIN_EMAIL) {
+      document.getElementById("admin").style.display = "inline";
+    }
+  }
+});
+</script>
+</body>
+</html>

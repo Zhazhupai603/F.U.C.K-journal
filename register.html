@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>注册 | 屎记期刊</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
+</head>
+<body>
+<header class="header">
+  <h1>屎记期刊 | SHIT JOURNAL</h1>
+  <p class="slogan">Truth Fades, S.H.I.T Lasts.</p>
+</header>
+
+<nav class="nav">
+  <a href="index.html">首页</a>
+  <a href="login.html">登录</a>
+</nav>
+
+<div class="form-container">
+  <h2 class="form-title">用户注册</h2>
+  <div id="clerk-register"></div>
+</div>
+
+<script>
+const PUB_KEY = "pk_test_Zmx5aW5nLWxpemFyZC0xMy5jbGVyay5hY2NvdW50cy5kZXYk";
+Clerk.load({ publishableKey: PUB_KEY }).then(() => {
+  Clerk.mountSignUp("#clerk-register");
+});
+</script>
+</body>
+</html>
