@@ -100,25 +100,24 @@
     margin-top:5px;
   }
 
-  /* 导航 */
+  /* 统一导航栏：5个项目固定 */
   .nav {
-    background:#2c3e50;
-    padding:15px 0;
-    text-align:center;
+    background-color: #2c3e50;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
   .nav a {
-    color:#fff;
-    padding:10px 20px;
-    margin:0 5px;
-    font-size:14px;
-    text-transform:uppercase;
-    border-radius:4px;
-    transition:background 0.3s;
+    color: #fff;
+    padding: 10px 20px;
+    margin: 0 5px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    transition: background 0.3s;
   }
-  .nav a:hover {
-    background:#e74c3c;
-    color:#fff;
-  }
+  .nav a:hover { background-color: #e74c3c; color: #fff; }
 
   /* 主内容区 */
   .content { padding:50px 0; }
@@ -169,7 +168,7 @@
     .journal-logo { font-size:2rem; }
     .journal-logo span { font-size:2.2rem; }
     .highlight-letter { font-size:1.2rem; }
-    .nav a { padding:8px 12px; font-size:12px; }
+    .nav a { padding:8px 12px; font-size:12px; margin:0 2px; }
     .section { padding:20px; }
     #auth-container { top:15px; right:15px; font-size:12px; }
   }
@@ -196,19 +195,20 @@
     </div>
     <div class="journal-logo">F<span>.</span>U<span>.</span>C<span>.</span>K</div>
     <div class="journal-fullname">
-      <span class="highlight-letter">F</span>udan 
-      <span class="highlight-letter">U</span>ndergraduate 
-      <span class="highlight-letter">C</span>ourse-
-      <span class="highlight-letter">K</span>work
+  <span class="highlight-letter">F</span>udan 
+<span class="highlight-letter">U</span>ndergraduate 
+Course-wor<span class="highlight-letter">k</span>
     </div>
     <p class="slogan">每一篇，都是DDL的奇迹</p>
   </div>
 </header>
 
+<!-- 统一导航栏：5个项目固定 -->
 <nav class="nav">
   <div class="container">
     <a href="index.html">HOME 主页</a>
     <a href="submit.html">SUBMIT 投稿</a>
+    <a href="community.html">COMMUNITY 社区</a>
     <a href="paper.html">PAPER 论文</a>
     <a href="contact.html">CONTACT 联系我们</a>
   </div>
@@ -236,7 +236,7 @@
 
 <footer class="footer">
   <div class="container">
-    <p>&copy; 2026 F.U.C.K | <span class="highlight-letter">F</span>udan <span class="highlight-letter">U</span>ndergraduate <span class="highlight-letter">C</span>ourse-<span class="highlight-letter">K</span>work | 每一篇，都是DDL的奇迹</p>
+    <p>&copy; 2026 F.U.C.K | <span class="highlight-letter">F</span>udan <span class="highlight-letter">U</span>ndergraduate Course-wor<span class="highlight-letter">k</span> | 每一篇，都是DDL的奇迹</p>
   </div>
 </footer>
 
