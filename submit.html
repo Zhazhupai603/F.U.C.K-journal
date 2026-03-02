@@ -7,49 +7,154 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+  /* 全局基础样式（和其他页面统一） */
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: 'Roboto', 'Noto Serif SC', serif; color:#333; background:#f8f9fa; line-height:1.6; }
   a { text-decoration:none; color:#2c3e50; transition:all 0.3s; }
   a:hover { color:#e74c3c; }
   .container { max-width:1200px; margin:0 auto; padding:0 20px; }
 
+  /* 头部样式（统一） */
   .header { position:relative; padding:80px 0 40px; background:#fff; border-bottom:1px solid #eee; text-align:center; }
   .journal-logo { font-size:3.5rem; font-weight:700; margin-bottom:15px; }
   .journal-logo span { color:#e74c3c; font-weight:900; font-size:4rem; }
   .journal-fullname { font-size:1.2rem; color:#666; margin-bottom:20px; font-style:italic; }
   .slogan { font-size:1.3rem; color:#2c3e50; font-weight:500; margin-top:10px; }
 
+  /* 导航样式（统一） */
   .nav { background:#2c3e50; padding:15px 0; text-align:center; }
   .nav a { color:#fff; padding:10px 20px; margin:0 5px; font-size:14px; text-transform:uppercase; border-radius:4px; transition:background 0.3s; }
   .nav a:hover { background:#e74c3c; color:#fff; }
 
+  /* 主内容区 */
   .content { padding:50px 0; }
   .section { background:#fff; padding:40px; border-radius:12px; box-shadow:0 2px 20px rgba(0,0,0,0.05); }
   .section h2 { font-size:1.8rem; color:#2c3e50; margin-bottom:20px; padding-bottom:10px; border-bottom:2px solid #eee; text-transform:uppercase; }
+  .section .tips { color:#e74c3c; margin-bottom:20px; font-size:14px; text-align:center; }
 
-  .form-box { max-width:700px; margin:0 auto; }
-  .form-box input, .form-box textarea { width:100%; padding:12px 15px; margin:10px 0; border:1px solid #e0e0e0; border-radius:8px; font-size:14px; }
-  .form-box textarea { min-height:150px; font-family:inherit; }
-  .form-box button { padding:12px 30px; background:#e74c3c; color:#fff; border:none; border-radius:8px; font-size:16px; cursor:pointer; transition:background 0.3s; }
-  .form-box button:hover { background:#c0392b; }
+  .form-box { max-width:700px; margin:0 auto; text-align:center; }
+  .form-box .submit-btn { padding:15px 40px; background:#e74c3c; color:#fff; border:none; border-radius:8px; font-size:18px; cursor:pointer; transition:background 0.3s; margin-top:20px; }
+  .form-box .submit-btn:hover { background:#c0392b; }
 
+  /* 页脚样式（统一） */
   .footer { text-align:center; padding:40px 0; background:#2c3e50; color:#fff; margin-top:50px; }
   .footer p { font-size:14px; opacity:0.8; }
 
+  /* 登录容器（统一） */
   #auth-container { position:absolute; top:25px; right:30px; z-index:999; display:flex; gap:15px; font-size:14px; }
   #loginBtn { cursor:pointer; text-decoration:underline; color:#e74c3c; }
   #userName { color:#2c3e50; font-weight:500; }
   #logoutBtn { cursor:pointer; text-decoration:underline; color:#e74c3c; display:none; }
+
+  /* ========== 核心：统一模态弹窗样式（和登录弹窗一致） ========== */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(2px);
+  }
+  .modal.show { display: flex; }
+  .modal-content {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  }
+  .modal-content h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+  }
+  .modal-content p {
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.8;
+  }
+  .modal-btn {
+    padding: 10px 30px;
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 0 5px;
+    transition: background 0.3s;
+  }
+  .modal-btn.cancel {
+    background: #999;
+  }
+  .modal-btn:hover {
+    background: #c0392b;
+  }
+  .modal-btn.cancel:hover {
+    background: #666;
+  }
 </style>
 </head>
 <body>
 
+<!-- 登录/注册弹窗（保留原有） -->
+<div class="modal" id="loginModal">
+  <div class="modal-content">
+    <span style="float:right; cursor:pointer; font-size:24px; color:#999;" onclick="closeModal('loginModal')">&times;</span>
+    <h3>登录/注册</h3>
+    <!-- 这里可以复用你index.html里的登录/注册表单，保持样式一致 -->
+    <div>
+      <input type="text" id="modalLoginUser" placeholder="用户名" style="width:100%; padding:10px; margin:10px 0; border:1px solid #eee; border-radius:4px;">
+      <input type="password" id="modalLoginPwd" placeholder="密码" style="width:100%; padding:10px; margin:10px 0; border:1px solid #eee; border-radius:4px;">
+      <button class="modal-btn" onclick="doModalLogin()">登录</button>
+      <button class="modal-btn cancel" onclick="closeModal('loginModal')">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 未登录提示弹窗 -->
+<div class="modal" id="notLoginModal">
+  <div class="modal-content">
+    <h3>提示</h3>
+    <p>请先登录后再进行投稿操作～</p>
+    <button class="modal-btn" onclick="openModal('loginModal'); closeModal('notLoginModal')">去登录</button>
+    <button class="modal-btn cancel" onclick="closeModal('notLoginModal')">取消</button>
+  </div>
+</div>
+
+<!-- 投稿确认弹窗 -->
+<div class="modal" id="submitConfirmModal">
+  <div class="modal-content">
+    <h3>确认投稿</h3>
+    <p>点击「确认」将跳转到腾讯问卷完成投稿，是否继续？</p>
+    <button class="modal-btn" onclick="goToTencentForm(); closeModal('submitConfirmModal')">确认</button>
+    <button class="modal-btn cancel" onclick="closeModal('submitConfirmModal')">取消</button>
+  </div>
+</div>
+
+<!-- 操作成功弹窗 -->
+<div class="modal" id="successModal">
+  <div class="modal-content">
+    <h3>操作成功</h3>
+    <p>已为你打开腾讯问卷投稿页面！</p>
+    <button class="modal-btn" onclick="closeModal('successModal')">确定</button>
+  </div>
+</div>
+
+<!-- 页面主体 -->
 <header class="header">
   <div class="container">
     <div id="auth-container">
-      <span id="loginBtn">登录/注册</span>
+      <span id="loginBtn" onclick="openModal('loginModal')">登录/注册</span>
       <span id="userName"></span>
-      <span id="logoutBtn">退出</span>
+      <span id="logoutBtn" onclick="doLogout()">退出</span>
     </div>
     <div class="journal-logo">F<span>.</span>U<span>.</span>C<span>.</span>K</div>
     <div class="journal-fullname">Fudan undergraduate course-work</div>
@@ -70,12 +175,9 @@
   <div class="container">
     <section class="section">
       <h2>Submit Your Paper 投稿系统</h2>
+      <p class="tips">⚠️ 点击下方按钮将通过弹窗确认后跳转到腾讯问卷投稿</p>
       <div class="form-box">
-        <input type="text" id="title" placeholder="论文标题">
-        <input type="text" id="author" placeholder="作者姓名">
-        <input type="text" id="major" placeholder="学院/专业">
-        <textarea id="abstract" placeholder="请粘贴论文摘要…"></textarea>
-        <button type="button" onclick="submitPaper()">提交稿件</button>
+        <button type="button" class="submit-btn" onclick="showSubmitConfirm()">前往腾讯问卷投稿</button>
       </div>
     </section>
   </div>
@@ -88,42 +190,68 @@
 </footer>
 
 <script>
+// 你的腾讯问卷链接（替换成实际地址）
+const TENCENT_FORM_URL = "https://wj.qq.com/s2/25846300/";
+
+// ========== 统一弹窗控制函数（所有弹窗通用） ==========
+// 打开弹窗
+function openModal(modalId) {
+  document.getElementById(modalId).classList.add("show");
+}
+// 关闭弹窗
+function closeModal(modalId) {
+  document.getElementById(modalId).classList.remove("show");
+}
+
+// ========== 登录相关逻辑 ==========
 // 检查登录
-function checkLogin(){
+function checkLogin() {
   const u = localStorage.getItem("loginUser");
-  if(u){
-    document.getElementById("loginBtn").style.display="none";
+  if(u) {
+    document.getElementById("loginBtn").style.display = "none";
     document.getElementById("userName").innerText = u;
     document.getElementById("logoutBtn").style.display = "inline";
   }
 }
-
-// 退出
-document.getElementById("logoutBtn").onclick = () => {
+// 退出登录
+function doLogout() {
   localStorage.removeItem("loginUser");
-  location.href = "index.html";
-};
-
-// 提交稿件（真正可用）
-function submitPaper() {
-  const title = document.getElementById("title").value.trim();
-  const author = document.getElementById("author").value.trim();
-  const major = document.getElementById("major").value.trim();
-  const abstract = document.getElementById("abstract").value.trim();
-
-  if (!title || !author || !major || !abstract) {
-    alert("请填写完整信息！");
-    return;
+  checkLogin();
+  openModal("successModal"); // 用自定义弹窗提示退出成功
+  document.querySelector("#successModal p").innerText = "退出成功！";
+}
+// 弹窗登录逻辑（简化版，可和index.html的登录逻辑对齐）
+function doModalLogin() {
+  const user = document.getElementById("modalLoginUser").value.trim();
+  const pwd = document.getElementById("modalLoginPwd").value.trim();
+  if(user && pwd) {
+    localStorage.setItem("loginUser", user);
+    closeModal("loginModal");
+    checkLogin();
+    openModal("successModal");
+    document.querySelector("#successModal p").innerText = "登录成功！";
+  } else {
+    alert("请填写用户名和密码"); // 也可改成自定义弹窗，这里简化
   }
-
-  alert(
-    "投稿成功！\n\n" +
-    "标题：" + title + "\n" +
-    "作者：" + author + "\n" +
-    "我们会尽快审核～"
-  );
 }
 
+// ========== 投稿相关逻辑 ==========
+// 显示投稿确认弹窗
+function showSubmitConfirm() {
+  const user = localStorage.getItem("loginUser");
+  if(!user) {
+    openModal("notLoginModal"); // 未登录显示提示弹窗
+  } else {
+    openModal("submitConfirmModal"); // 已登录显示确认弹窗
+  }
+}
+// 跳转到腾讯问卷
+function goToTencentForm() {
+  window.open(TENCENT_FORM_URL, "_blank");
+  openModal("successModal"); // 显示跳转成功弹窗
+}
+
+// 页面初始化
 window.onload = checkLogin;
 </script>
 </body>
