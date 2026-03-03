@@ -308,9 +308,11 @@
       <h1 class="paper-title" id="paperTitle">加载中...</h1>
       <p class="paper-authors" id="paperAuthors"></p>
       <div class="paper-meta">
+        <span id="paperSerial">No.: -</span>
         <span id="paperDoi">DOI: -</span>
         <span id="paperDate">Published: -</span>
         <span id="paperVolume">Volume: -</span>
+        <span id="paperDownloads">Downloads: 0</span>
       </div>
       <div class="paper-cover">
         <img id="paperCover" src="" alt="论文头图">
@@ -358,51 +360,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-const PAPER_DATA = {
-  "10.FUCK-2026.001": {
-    title: "基于摸鱼时长与咖啡摄入量的相关性研究",
-    authors: "Dr.摸鱼达人, 王同学, 李同学",
-    doi: "10.FUCK/2026.001",
-    date: "2026-01-15",
-    volume: "Vol. 1, Issue 1",
-    pdfFile: "10.FUCK-2026.001.pdf",
-    coverImage: "assets/paper-covers/10.FUCK-2026.001.jpg",
-    abstract: "本研究通过对500个工位进行连续6个月追踪，记录日均咖啡摄入量、摸鱼持续时间与提交质量评分。结果表明，咖啡摄入在短期内提升了任务启动速度，但在连续高摄入情况下，会显著提高无效浏览行为比例。",
-    method: "研究使用分层抽样设计，在不同学院中抽取受试样本。通过浏览行为日志与问卷双轨验证，结合线性混合模型剔除课程难度与队友水平等干扰项。",
-    conclusion: "咖啡并非摸鱼的直接成因，但会放大DDL压力下的注意力漂移。建议将摄入窗口控制在提交前6小时，并搭配番茄钟策略以减少认知波动。",
-    keywords: ["咖啡因", "学习行为", "摸鱼", "本科论文", "时间管理"]
-  },
-  "10.FUCK-2026.002": {
-    title: "DDL截止前24小时论文完成质量研究",
-    authors: "Dr.赶due人, 陈同学, 赵同学",
-    doi: "10.FUCK/2026.002",
-    date: "2026-01-22",
-    volume: "Vol. 1, Issue 1",
-    pdfFile: "10.FUCK-2026.002.pdf",
-    coverImage: "assets/paper-covers/10.FUCK-2026.002.jpg",
-    abstract: "本研究分析1000篇本科课程论文及其提交时间戳，评估不同完稿时间窗口对文字质量、结构完整度与查重结果的影响。结果显示，临近DDL完稿组在结构创新性上更高，但语法错误和引用格式错误显著增加。",
-    method: "数据来自匿名课程平台导出记录，采用文本可读性指标、引用规范评分与教师盲评结果进行多指标交叉。研究使用Logistic回归评估完稿时间窗口与高分概率之间的关系。",
-    conclusion: "DDL压力可能激活短时高强度创作能力，但无法替代前期资料整理。建议在DDL前24小时仅完成润色与结构修订，将核心论证提前至48小时完成。",
-    keywords: ["DDL", "写作质量", "论文评分", "时间窗口", "课程作业"]
-  },
-  "10.FUCK-2026.003": {
-    title: "本科课程论文查重率与修改次数反比研究",
-    authors: "Dr.降重大师, 周同学, 孙同学",
-    doi: "10.FUCK/2026.003",
-    date: "2026-02-03",
-    volume: "Vol. 1, Issue 2",
-    pdfFile: "10.FUCK-2026.003.pdf",
-    coverImage: "assets/paper-covers/10.FUCK-2026.003.jpg",
-    abstract: "研究统计了800篇课程论文的修改历史与最终查重率，发现当有效修改次数超过5次后，查重率下降趋势趋于稳定，说明内容重构比简单同义词替换更能改善原创性表现。",
-    method: "通过版本对比工具提取编辑差异，区分表层替换与深层重写。利用分段回归模型验证修改次数与查重率关系，并对专业差异进行稳健性检验。",
-    conclusion: "降低查重率的关键在于论证路径重构与案例更新，而非词汇层面的机械变换。建议建立“结构-论据-表达”三阶段修改清单，提高改稿效率。",
-    keywords: ["查重", "文本重写", "写作方法", "论文修改", "原创性"]
-  }
-};
+const PAPER_DATA = {};
 
 let currentPaperId = "";
 let currentPaperData = null;
 const PDF_STORAGE_DIR = "papers";
+const SHEETDB_API = "https://sheetdb.io/api/v1/ev8cjfow1i90w";
 const DEFAULT_PAPER_TEMPLATE = {
   authors: "F.U.C.K Journal Editorial Team",
   date: "2026-01-01",
@@ -509,6 +472,7 @@ function normalizeCatalogPaper(item) {
   const title = String(item.title || id || "Untitled Paper").trim();
   const pdfFile = String(item.pdfFile || `${id}.pdf`).trim();
   const coverImage = String(item.coverImage || `assets/paper-covers/${id}.jpg`).trim();
+  const serial = Number(item.serial || 0) || 0;
   const doi = String(item.doi || id).trim();
   const authors = String(item.authors || "").trim();
   const date = String(item.date || "").trim();
@@ -517,16 +481,34 @@ function normalizeCatalogPaper(item) {
   const keywords = Array.isArray(item.keywords)
     ? item.keywords.map((k) => String(k).trim()).filter(Boolean)
     : [];
-  return { id, title, pdfFile, coverImage, doi, authors, date, volume, abstract, keywords };
+  const downloadsRaw = Number(item.downloads || 0);
+  const downloads = Number.isFinite(downloadsRaw) && downloadsRaw > 0 ? Math.floor(downloadsRaw) : 0;
+  return { id, serial, title, pdfFile, coverImage, doi, authors, date, volume, abstract, keywords, downloads };
 }
 
 async function loadPaperCatalog() {
   try {
-    const res = await fetch(`papers/papers.json?t=${Date.now()}`);
-    if (!res.ok) throw new Error("catalog not found");
-    const data = await res.json();
-    if (!Array.isArray(data)) throw new Error("invalid catalog");
-    return data.map(normalizeCatalogPaper).filter((paper) => paper.id);
+    const remoteRes = await fetch(`${SHEETDB_API}?t=${Date.now()}`);
+    if (remoteRes.ok) {
+      const remoteData = await remoteRes.json();
+      if (Array.isArray(remoteData)) {
+        const sheetRows = remoteData
+          .map(normalizeCatalogPaper)
+          .filter((paper) => paper.id && paper.title && paper.pdfFile)
+          .map((paper) => ({ ...paper, _source: "sheetdb" }));
+        if (sheetRows.length > 0) return sheetRows;
+      }
+    }
+  } catch (error) {
+    console.warn("sheetdb load failed, fallback local:", error);
+  }
+
+  try {
+    const localRes = await fetch(`papers/papers.json?t=${Date.now()}`);
+    if (!localRes.ok) throw new Error("catalog not found");
+    const localData = await localRes.json();
+    if (!Array.isArray(localData)) throw new Error("invalid catalog");
+    return localData.map(normalizeCatalogPaper).filter((paper) => paper.id);
   } catch (error) {
     console.warn("paper catalog load failed:", error);
     return [];
@@ -535,6 +517,7 @@ async function loadPaperCatalog() {
 
 function buildPaperFromCatalog(catalogPaper) {
   return {
+    serial: catalogPaper.serial || 0,
     title: catalogPaper.title,
     authors: catalogPaper.authors || DEFAULT_PAPER_TEMPLATE.authors,
     doi: catalogPaper.doi || catalogPaper.id,
@@ -547,6 +530,90 @@ function buildPaperFromCatalog(catalogPaper) {
       ? catalogPaper.keywords
       : DEFAULT_PAPER_TEMPLATE.keywords
   };
+}
+
+function downloadCountKey(paperId) {
+  return `paperDownloadCount:${paperId}`;
+}
+
+function getDownloadCount(paperId) {
+  const raw = localStorage.getItem(downloadCountKey(paperId));
+  const count = Number(raw || 0);
+  return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+}
+
+function setDownloadCount(count) {
+  const node = document.getElementById("paperDownloads");
+  if (node) {
+    node.innerText = `Downloads: ${count}`;
+  }
+}
+
+async function updateSheetDownloadCount(paperId, nextCount) {
+  try {
+    const paper = currentPaperData || {};
+    const payload = {
+      data: {
+        id: paperId,
+        serial: "",
+        title: "",
+        doi: String(paper.doi || ""),
+        authors: String(paper.authors || ""),
+        pdfFile: "",
+        coverImage: "",
+        date: new Date().toISOString(),
+        volume: "",
+        abstract: "",
+        keywords: "",
+        downloads: "1"
+      }
+    };
+    const res = await fetch(SHEETDB_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    return res.ok;
+  } catch (error) {
+    console.warn("sheetdb download event post failed:", error);
+    return false;
+  }
+}
+
+async function fetchSheetDownloadEventCount(paperId) {
+  try {
+    const res = await fetch(`${SHEETDB_API}?t=${Date.now()}`);
+    if (!res.ok) return 0;
+    const rows = await res.json();
+    if (!Array.isArray(rows)) return 0;
+    return rows.filter((row) => {
+      if (!row || typeof row !== "object") return false;
+      const rowId = String(row.id || "").trim();
+      const title = String(row.title || "").trim();
+      const pdfFile = String(row.pdfFile || "").trim();
+      const downloads = Number(row.downloads || 0);
+      return rowId === paperId && !title && !pdfFile && Number.isFinite(downloads) && downloads > 0;
+    }).length;
+  } catch (error) {
+    console.warn("sheetdb download event read failed:", error);
+    return 0;
+  }
+}
+
+async function incrementDownloadCount() {
+  if (!currentPaperId) return;
+  const current = Number(currentPaperData?.downloads || getDownloadCount(currentPaperId) || 0);
+  const next = current + 1;
+  if (currentPaperData) {
+    currentPaperData.downloads = next;
+  }
+  localStorage.setItem(downloadCountKey(currentPaperId), String(next));
+  setDownloadCount(next);
+
+  const ok = await updateSheetDownloadCount(currentPaperId, next);
+  if (!ok) {
+    console.warn("Falling back to local download counter only for", currentPaperId);
+  }
 }
 
 function downloadCurrentPaper() {
@@ -591,6 +658,7 @@ async function downloadCurrentPaperPdf() {
     const pdfPath = `${PDF_STORAGE_DIR}/${paper.pdfFile}`;
     const directOk = await tryDirectPdfDownload(pdfPath, `${paper.doi.replace(/\//g, "-")}.pdf`);
     if (directOk) {
+      await incrementDownloadCount();
       showModal("已下载你上传的原始 PDF。", "下载成功");
       return;
     }
@@ -639,6 +707,7 @@ async function downloadCurrentPaperPdf() {
 
   try {
     await html2pdf().set(opt).from(temp).save();
+    await incrementDownloadCount();
     showModal("未检测到原始 PDF，已使用页面内容生成 PDF 下载。", "下载成功");
   } catch (error) {
     console.error("PDF下载失败：", error);
@@ -689,9 +758,15 @@ async function renderPaperDetail() {
   document.title = `F.U.C.K | ${paper.title}`;
   document.getElementById("paperTitle").innerText = paper.title;
   document.getElementById("paperAuthors").innerText = `Author(s): ${paper.authors}`;
+  document.getElementById("paperSerial").innerText = paper.serial ? `No.: ${paper.serial}` : "No.: -";
   document.getElementById("paperDoi").innerText = `DOI: ${paper.doi}`;
   document.getElementById("paperDate").innerText = `Published: ${paper.date}`;
   document.getElementById("paperVolume").innerText = paper.volume;
+  const baseDownloads = Number.isFinite(Number(paper.downloads)) ? Number(paper.downloads) : 0;
+  const eventDownloads = await fetchSheetDownloadEventCount(currentPaperId);
+  const localDownloads = getDownloadCount(currentPaperId);
+  const initialDownloads = Math.max(baseDownloads + eventDownloads, localDownloads);
+  setDownloadCount(initialDownloads);
   document.getElementById("paperAbstract").innerText = paper.abstract;
   applyPaperCover(paper);
 

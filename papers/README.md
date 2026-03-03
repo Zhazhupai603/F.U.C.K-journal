@@ -36,6 +36,25 @@ Then refresh the website. The new papers will show up in:
 To control which papers appear in the featured carousel,
 edit `papers/featured.json` (use paper IDs).
 
+## Avoid manual upload every time
+
+You do NOT need to edit SheetDB rows manually each time.
+
+Use one command to sync local catalog to SheetDB:
+
+```bash
+python scripts/sync_papers_to_sheetdb.py \
+  --api "https://sheetdb.io/api/v1/ev8cjfow1i90w" \
+  --source "papers/papers.json"
+```
+
+Typical workflow:
+
+1. Put new PDFs in `papers/`
+2. Update `papers/papers.json` (or generate it)
+3. Run the sync command above
+4. Refresh the site
+
 ## Optional custom metadata
 
 You can still edit `papers/papers.json` to give better titles:

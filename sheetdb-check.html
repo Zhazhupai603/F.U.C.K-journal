@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SheetDB 自检 | F.U.C.K</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f8f9fa; color: #2c3e50; }
+  .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); padding: 22px; margin-bottom: 18px; }
+  h1 { font-size: 26px; margin-bottom: 10px; }
+  h2 { font-size: 18px; margin-bottom: 12px; }
+  p { color: #566879; line-height: 1.65; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .btn {
+    border: none; border-radius: 8px; background: #2c3e50; color: #fff;
+    padding: 10px 14px; cursor: pointer; font-size: 14px;
+  }
+  .btn:hover { background: #e74c3c; }
+  .btn.secondary { background: #eef2f6; color: #2c3e50; }
+  input, select {
+    border: 1px solid #d4dde6; border-radius: 8px; padding: 10px 12px; font-size: 14px;
+    min-width: 260px;
+  }
+  .status { margin-top: 8px; font-size: 14px; }
+  .ok { color: #1b8a3a; }
+  .err { color: #c0392b; }
+  pre {
+    margin-top: 10px; background: #0f1720; color: #dce6f0; border-radius: 8px;
+    padding: 12px; overflow: auto; font-size: 12px; line-height: 1.55;
+  }
+  code { background: #eef2f6; padding: 2px 6px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>SheetDB 数据连通性自检</h1>
+    <p>这个页面用于验证你的 SheetDB 是否可用于全站论文共享数据（读 + 写）。默认做<strong>无副作用写测试</strong>：把 downloads 写回原值，不会改动统计结果。</p>
+    <div class="row">
+      <label for="apiInput">API</label>
+      <input id="apiInput" value="https://sheetdb.io/api/v1/ev8cjfow1i90w" />
+      <button class="btn" id="loadBtn" type="button">1) 读取并校验</button>
+      <button class="btn" id="initBtn" type="button">2) 一键初始化论文表</button>
+    </div>
+    <div id="readStatus" class="status"></div>
+  </div>
+
+  <div class="card">
+    <h2>写权限测试（无副作用）</h2>
+    <p>先读取后选择一篇论文，测试下载事件 POST 是否可用（与站点下载量统计一致）。</p>
+    <div class="row">
+      <select id="paperSelect"></select>
+      <button class="btn" id="writeCheckBtn" type="button">3) 测试写权限</button>
+      <button class="btn secondary" id="copyEndpointBtn" type="button">复制候选更新端点</button>
+    </div>
+    <div id="writeStatus" class="status"></div>
+    <pre id="log"></pre>
+  </div>
+</div>
+
+<script>
+const REQUIRED_FIELDS = ["id", "title", "pdfFile"];
+let rowsCache = [];
+let validRowsCache = [];
+
+function byId(id) { return document.getElementById(id); }
+
+function log(msg) {
+  const node = byId("log");
+  const ts = new Date().toLocaleTimeString();
+  node.textContent = `[${ts}] ${msg}\n` + node.textContent;
+}
+
+function setStatus(nodeId, ok, text) {
+  const node = byId(nodeId);
+  node.className = `status ${ok ? "ok" : "err"}`;
+  node.textContent = text;
+}
+
+function apiBase() {
+  return byId("apiInput").value.trim().replace(/\/$/, "");
+}
+
+function normalizeNumber(v) {
+  const n = Number(v || 0);
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+}
+
+function validPaperRows(rows) {
+  return rows.filter((r) => REQUIRED_FIELDS.every((k) => String(r[k] || "").trim()));
+}
+
+function fillSelect(rows) {
+  const sel = byId("paperSelect");
+  const writeBtn = byId("writeCheckBtn");
+  if (!rows.length) {
+    sel.innerHTML = `<option value="">无可用论文</option>`;
+    sel.disabled = true;
+    writeBtn.disabled = true;
+    writeBtn.style.opacity = "0.6";
+    writeBtn.style.cursor = "not-allowed";
+    return;
+  }
+  sel.disabled = false;
+  writeBtn.disabled = false;
+  writeBtn.style.opacity = "1";
+  writeBtn.style.cursor = "pointer";
+  sel.innerHTML = rows.map((r) => {
+    const d = normalizeNumber(r.downloads);
+    return `<option value="${r.id}">${r.id} | ${r.title} | downloads=${d}</option>`;
+  }).join("");
+}
+
+async function loadRows() {
+  const url = `${apiBase()}?t=${Date.now()}`;
+  log(`GET ${url}`);
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`GET failed: ${res.status}`);
+  const data = await res.json();
+  if (!Array.isArray(data)) throw new Error("Response is not array");
+  rowsCache = data;
+  validRowsCache = validPaperRows(data);
+  fillSelect(validRowsCache);
+  if (!validRowsCache.length) {
+    const first = data[0] && typeof data[0] === "object" ? Object.keys(data[0]).join(", ") : "无";
+    setStatus("readStatus", false, `读取成功，但当前没有可识别论文行。检测到字段：${first || "无"}。可点击“一键初始化论文表”。`);
+  } else {
+    setStatus("readStatus", true, `读取成功：共 ${data.length} 行，有效论文 ${validRowsCache.length} 行。`);
+  }
+  log(`Rows=${data.length}, validPaperRows=${validRowsCache.length}`);
+}
+
+async function loadLocalRows() {
+  const res = await fetch(`papers/papers.json?t=${Date.now()}`);
+  if (!res.ok) throw new Error(`读取本地 papers.json 失败: ${res.status}`);
+  const data = await res.json();
+  if (!Array.isArray(data)) throw new Error("本地 papers.json 不是数组");
+  const rows = data.filter((r) => r && typeof r === "object");
+  return rows
+    .map((item) => ({
+      id: String(item.id || "").trim(),
+      serial: String(item.serial || "").trim(),
+      title: String(item.title || "").trim(),
+      doi: String(item.doi || item.id || "").trim(),
+      authors: String(item.authors || "").trim(),
+      pdfFile: String(item.pdfFile || "").trim(),
+      coverImage: String(item.coverImage || "").trim(),
+      date: String(item.date || "").trim(),
+      volume: String(item.volume || "").trim(),
+      abstract: String(item.abstract || "").trim(),
+      keywords: Array.isArray(item.keywords) ? item.keywords.join(";") : String(item.keywords || "").trim(),
+      downloads: String(item.downloads ?? 0)
+    }))
+    .filter((r) => r.id && r.title && r.pdfFile);
+}
+
+async function upsertRow(row) {
+  const payload = { data: row };
+  const endpoints = [
+    `${apiBase()}/id/${encodeURIComponent(row.id)}`,
+    `${apiBase()}/search?id=${encodeURIComponent(row.id)}`
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      for (const method of ["PATCH", "PUT"]) {
+        const res = await fetch(endpoint, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          log(`${method} OK ${row.id} -> ${endpoint}`);
+          return true;
+        }
+        log(`${method} FAIL ${row.id} -> ${endpoint} (${res.status})`);
+      }
+    } catch (err) {
+      log(`UPDATE ERROR ${row.id} -> ${endpoint}: ${err.message}`);
+    }
+  }
+
+  try {
+    const res = await fetch(apiBase(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      log(`POST OK ${row.id}`);
+      return true;
+    }
+    const txt = await res.text();
+    log(`POST FAIL ${row.id} (${res.status}) ${txt.slice(0, 120)}`);
+  } catch (err) {
+    log(`POST ERROR ${row.id}: ${err.message}`);
+  }
+
+  return false;
+}
+
+async function initPaperTable() {
+  const localRows = await loadLocalRows();
+  if (!localRows.length) throw new Error("本地 papers.json 没有可同步的论文行");
+  let ok = 0;
+  for (const row of localRows) {
+    if (await upsertRow(row)) ok += 1;
+  }
+  setStatus("readStatus", ok === localRows.length, `初始化完成：${ok}/${localRows.length} 行同步成功。`);
+  await loadRows();
+}
+
+function selectedRow() {
+  if (!validRowsCache.length) {
+    throw new Error("当前 API 还不是论文表，无法执行写测试。请先把表字段改成 id/title/pdfFile/... 。");
+  }
+  const id = byId("paperSelect").value;
+  const row = validRowsCache.find((r) => String(r.id || "") === id);
+  if (!row) throw new Error("请先读取并选择论文行");
+  return row;
+}
+
+async function patchSameValue(row) {
+  const id = String(row.id);
+  const endpoint = apiBase();
+  const payload = {
+    data: {
+      id,
+      serial: "",
+      title: "",
+      doi: String(row.doi || id),
+      authors: String(row.authors || ""),
+      pdfFile: "",
+      coverImage: "",
+      date: new Date().toISOString(),
+      volume: "",
+      abstract: "",
+      keywords: "",
+      downloads: "1"
+    }
+  };
+
+  try {
+    log(`POST ${endpoint} payload=${JSON.stringify(payload)}`);
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      log(`POST success on ${endpoint}`);
+      return { ok: true, endpoint: `POST ${endpoint}` };
+    }
+    log(`POST failed ${res.status} on ${endpoint}`);
+    return { ok: false, endpoint: "" };
+  } catch (err) {
+    log(`POST error on ${endpoint}: ${err.message}`);
+    return { ok: false, endpoint: "" };
+  }
+}
+
+byId("loadBtn").addEventListener("click", async () => {
+  setStatus("readStatus", true, "读取中...");
+  try {
+    await loadRows();
+  } catch (err) {
+    setStatus("readStatus", false, `读取失败：${err.message}`);
+    log(`READ error: ${err.message}`);
+  }
+});
+
+byId("initBtn").addEventListener("click", async () => {
+  try {
+    setStatus("readStatus", true, "初始化中...");
+    await initPaperTable();
+  } catch (err) {
+    setStatus("readStatus", false, `初始化失败：${err.message}`);
+    log(`INIT error: ${err.message}`);
+  }
+});
+
+byId("writeCheckBtn").addEventListener("click", async () => {
+  try {
+    const row = selectedRow();
+    setStatus("writeStatus", true, "写入测试中...");
+    const result = await patchSameValue(row);
+    if (result.ok) {
+      setStatus("writeStatus", true, `写权限通过（命中端点：${result.endpoint}）`);
+    } else {
+      setStatus("writeStatus", false, "写权限失败：下载事件 POST 不可用，请检查 SheetDB 写权限/防护策略。 ");
+    }
+  } catch (err) {
+    setStatus("writeStatus", false, err.message);
+    log(`WRITE test error: ${err.message}`);
+  }
+});
+
+byId("copyEndpointBtn").addEventListener("click", async () => {
+  try {
+    const id = byId("paperSelect").value || "<paper-id>";
+    const base = apiBase();
+    const text = `${base}/id/${encodeURIComponent(id)}\n${base}/search?id=${encodeURIComponent(id)}`;
+    await navigator.clipboard.writeText(text);
+    setStatus("writeStatus", true, "候选更新端点已复制。 ");
+  } catch (err) {
+    setStatus("writeStatus", false, "复制失败，请手动查看日志。 ");
+  }
+});
+
+setStatus("readStatus", true, "点击“读取并校验”开始。");
+setStatus("writeStatus", true, "等待执行写权限测试。");
+fillSelect([]);
+</script>
+</body>
+</html>

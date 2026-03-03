@@ -174,6 +174,67 @@
     font-weight: 600;
     letter-spacing: 0.4px;
   }
+  .paper-search-wrap {
+    margin-bottom: 18px;
+  }
+  .paper-search-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .paper-search-input-wrap {
+    position: relative;
+    flex: 1;
+  }
+  .paper-search-input {
+    width: 100%;
+    border: 1px solid #d7dfe7;
+    border-radius: 8px;
+    padding: 11px 44px 11px 14px;
+    font-size: 14px;
+    color: #2c3e50;
+    background: #fff;
+  }
+  .paper-search-input:focus {
+    outline: none;
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.12);
+  }
+  .paper-search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #7d8a98;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: none;
+  }
+  .paper-search-clear:hover {
+    background: #f0f3f7;
+    color: #2c3e50;
+  }
+  .paper-search-count {
+    font-size: 13px;
+    color: #5a6b7b;
+    min-width: 96px;
+    text-align: right;
+  }
+  .paper-search-empty {
+    display: none;
+    margin: 14px 0;
+    padding: 12px 14px;
+    border: 1px dashed #e3b3ad;
+    border-radius: 8px;
+    color: #7b3a35;
+    background: #fff7f6;
+    font-size: 14px;
+  }
 
   /* 页脚 */
   .footer {
@@ -196,6 +257,8 @@
     .nav a { padding:8px 12px; font-size:12px; margin:0 2px; }
     .section { padding:20px; }
     #auth-container { top:15px; right:15px; font-size:12px; }
+    .paper-search-row { flex-direction: column; align-items: stretch; }
+    .paper-search-count { text-align: left; min-width: unset; }
   }
 </style>
 </head>
@@ -243,34 +306,39 @@
   <div class="container">
     <section class="section">
       <h2>Published Papers 已发表论文</h2>
-      <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.001" aria-label="查看论文详情：基于摸鱼时长与咖啡摄入量的相关性研究">
-        <div class="paper-item">
-          <h3>基于摸鱼时长与咖啡摄入量的相关性研究</h3>
-          <p>作者：Dr.摸鱼达人 | DOI: 10.FUCK/2026.001</p>
-          <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+      <div class="paper-search-wrap">
+        <div class="paper-search-row">
+          <div class="paper-search-input-wrap">
+            <input id="paperSearchInput" class="paper-search-input" type="text" placeholder="Search by title / author / DOI..." aria-label="搜索论文">
+            <button id="paperSearchClear" class="paper-search-clear" type="button" aria-label="清空搜索">✕</button>
+          </div>
+          <span id="paperSearchCount" class="paper-search-count"></span>
         </div>
-      </a>
-      <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.002" aria-label="查看论文详情：DDL截止前24小时论文完成质量研究">
-        <div class="paper-item">
-          <h3>DDL截止前24小时论文完成质量研究</h3>
-          <p>作者：Dr.赶due人 | DOI: 10.FUCK/2026.002</p>
-          <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
-        </div>
-      </a>
-      <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.003" aria-label="查看论文详情：本科课程论文查重率与修改次数反比研究">
-        <div class="paper-item">
-          <h3>本科课程论文查重率与修改次数反比研究</h3>
-          <p>作者：Dr.降重大师 | DOI: 10.FUCK/2026.003</p>
-          <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
-        </div>
-      </a>
-      <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.004" aria-label="查看论文详情：微观经济学视角下的CSGO经济系统与玩家购买决策分析">
-        <div class="paper-item">
-          <h3>微观经济学视角下的CSGO经济系统与玩家购买决策分析</h3>
-          <p>作者：找钱狼，炸猪排 | DOI: 10.FUCK/2026.004</p>
-          <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
-        </div>
-      </a>
+        <div id="paperSearchEmpty" class="paper-search-empty">未找到匹配的论文，请尝试其他关键词。</div>
+      </div>
+      <div id="paperList">
+        <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.004" aria-label="查看论文详情：微观经济学视角下的CSGO经济系统与玩家购买决策分析">
+          <div class="paper-item">
+            <h3>微观经济学视角下的CSGO经济系统与玩家购买决策分析</h3>
+            <p>作者：找钱狼，炸猪排 | DOI: 10.FUCK/2026.001</p>
+            <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+          </div>
+        </a>
+        <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.006" aria-label="查看论文详情：胶原蛋白与可吸收手术缝合线">
+          <div class="paper-item">
+            <h3>胶原蛋白与可吸收手术缝合线</h3>
+            <p>作者：珍珠泡 | DOI: 10.FUCK/2026.002</p>
+            <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+          </div>
+        </a>
+        <a class="paper-item-link" href="paper-detail.html?id=10.FUCK-2026.007" aria-label="查看论文详情：微创外科学的发展与革新：以宫腔镜子宫肌瘤切除术为例">
+          <div class="paper-item">
+            <h3>微创外科学的发展与革新：以宫腔镜子宫肌瘤切除术为例</h3>
+            <p>作者：辣椒味 | DOI: 10.FUCK/2026.003</p>
+            <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+          </div>
+        </a>
+      </div>
     </section>
   </div>
 </main>
@@ -322,6 +390,67 @@ function goToLogin() {
   window.location.href = "index.html?auth=1";
 }
 
+const SHEETDB_API = "https://sheetdb.io/api/v1/ev8cjfow1i90w";
+
+function normalizePaperItem(item) {
+  const id = String(item.id || "").trim();
+  const title = String(item.title || id || "Untitled Paper").trim();
+  const doi = String(item.doi || id).trim();
+  const authors = String(item.authors || "F.U.C.K Journal Editorial Team").trim();
+  const pdfFile = String(item.pdfFile || "").trim();
+  return { id, title, doi, authors, pdfFile };
+}
+
+async function loadPaperCatalog() {
+  try {
+    const remoteRes = await fetch(`${SHEETDB_API}?t=${Date.now()}`);
+    if (remoteRes.ok) {
+      const remoteData = await remoteRes.json();
+      if (Array.isArray(remoteData)) {
+        const fromSheet = remoteData
+          .map(normalizePaperItem)
+          .filter((paper) => paper.id && paper.title && paper.pdfFile);
+        if (fromSheet.length > 0) return fromSheet;
+      }
+    }
+  } catch (error) {
+    console.warn("sheetdb unavailable, fallback local:", error);
+  }
+
+  try {
+    const localRes = await fetch(`papers/papers.json?t=${Date.now()}`);
+    if (!localRes.ok) throw new Error("local catalog not found");
+    const localData = await localRes.json();
+    if (!Array.isArray(localData)) throw new Error("local catalog invalid");
+    return localData
+      .map(normalizePaperItem)
+      .filter((paper) => paper.id && paper.title && paper.pdfFile);
+  } catch (error) {
+    console.warn("local catalog unavailable:", error);
+    return [];
+  }
+}
+
+function renderPaperList(papers) {
+  const listNode = document.getElementById("paperList");
+  if (!listNode) return;
+
+  if (!papers.length) {
+    listNode.innerHTML = `<div class="paper-item"><h3>No papers available</h3><p>暂无可展示论文。</p></div>`;
+    return;
+  }
+
+  listNode.innerHTML = papers.map((paper) => `
+    <a class="paper-item-link" href="paper-detail.html?id=${paper.id}" aria-label="查看论文详情：${paper.title}">
+      <div class="paper-item">
+        <h3>${paper.title}</h3>
+        <p>作者：${paper.authors} | DOI: ${paper.doi}</p>
+        <span class="paper-more">View Paper Details <i class="bi bi-arrow-right"></i></span>
+      </div>
+    </a>
+  `).join("");
+}
+
 // 退出登录
 function doLogout() {
   localStorage.removeItem("loginUser");
@@ -329,8 +458,129 @@ function doLogout() {
   showModal("退出成功！");
 }
 
+function debounce(fn, delay) {
+  let timer = null;
+  return function debounced(...args) {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+function normalizeSearchText(value) {
+  return String(value || "").toLowerCase().replace(/\s+/g, "").trim();
+}
+
+function isSubsequenceMatch(query, text) {
+  if (!query) return true;
+  let i = 0;
+  let j = 0;
+  while (i < query.length && j < text.length) {
+    if (query[i] === text[j]) {
+      i += 1;
+    }
+    j += 1;
+  }
+  return i === query.length;
+}
+
+function fuzzyScore(query, text) {
+  if (!query) return 1;
+  if (text.includes(query)) return 3;
+
+  const tokens = query.split(/[-_/.:，,;；]+/).filter(Boolean);
+  if (tokens.length > 1 && tokens.every((token) => text.includes(token))) {
+    return 2;
+  }
+
+  if (isSubsequenceMatch(query, text)) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function initPaperSearch() {
+  const input = document.getElementById("paperSearchInput");
+  const clearBtn = document.getElementById("paperSearchClear");
+  const countNode = document.getElementById("paperSearchCount");
+  const emptyNode = document.getElementById("paperSearchEmpty");
+  const cards = Array.from(document.querySelectorAll(".paper-item-link"));
+
+  if (!input || !clearBtn || !countNode || !emptyNode || cards.length === 0) return;
+
+  const searchableCards = cards.map((card) => {
+    const text = normalizeSearchText(`${card.textContent || ""} ${card.getAttribute("href") || ""}`);
+    return { card, text };
+  });
+
+  const total = searchableCards.length;
+
+  function updateUrlQuery(value) {
+    const params = new URLSearchParams(window.location.search);
+    if (value) {
+      params.set("q", value);
+    } else {
+      params.delete("q");
+    }
+    const query = params.toString();
+    const target = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+    history.replaceState(null, "", target);
+  }
+
+  function applyFilter(raw) {
+    const query = normalizeSearchText(raw);
+    let visible = 0;
+
+    searchableCards.forEach(({ card, text }) => {
+      const score = fuzzyScore(query, text);
+      const matched = score > 0;
+      card.style.display = matched ? "" : "none";
+      if (matched) visible += 1;
+    });
+
+    countNode.textContent = `显示 ${visible} / ${total}`;
+    emptyNode.style.display = visible === 0 ? "block" : "none";
+    clearBtn.style.display = query ? "inline-flex" : "none";
+    updateUrlQuery(raw.trim());
+  }
+
+  const debouncedFilter = debounce((value) => applyFilter(value), 250);
+
+  input.addEventListener("input", (event) => {
+    debouncedFilter(event.target.value || "");
+  });
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      input.value = "";
+      applyFilter("");
+      input.blur();
+    }
+  });
+
+  clearBtn.addEventListener("click", () => {
+    input.value = "";
+    applyFilter("");
+    input.focus();
+  });
+
+  const params = new URLSearchParams(window.location.search);
+  const initialQ = params.get("q") || "";
+  if (initialQ) {
+    input.value = initialQ;
+  }
+  applyFilter(initialQ);
+}
+
 // 初始化
-window.onload = checkLogin;
+window.addEventListener("DOMContentLoaded", async function () {
+  checkLogin();
+  const papers = await loadPaperCatalog();
+  renderPaperList(papers);
+  initPaperSearch();
+});
 </script>
 </body>
 </html>

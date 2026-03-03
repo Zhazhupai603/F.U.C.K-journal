@@ -47,6 +47,25 @@ This publish mode will:
 - append the homepage card in `index.html`
 - write detail metadata (`authors/date/volume/abstract/method/conclusion/keywords`) into `papers/papers.json` for detail page sync
 
+### Fully automatic with SheetDB sync (no manual table editing)
+
+Add `--sheetdb-api` to publish command:
+
+```bash
+python tools/pdf_generator.py \
+  --csv "/home/eagle/pig/国行供应链/25846300_202603030134363050.csv" \
+  --words-dir "/home/eagle/pig/国行供应链/F.U.C.K-journal/words" \
+  --out-dir "/home/eagle/pig/国行供应链/F.U.C.K-journal/generated_pdfs" \
+  --state-file "/home/eagle/pig/国行供应链/F.U.C.K-journal/tools/doi_state.json" \
+  --doi-year 2026 \
+  --doi-start 4 \
+  --publish \
+  --site-root "/home/eagle/pig/国行供应链/F.U.C.K-journal" \
+  --sheetdb-api "https://sheetdb.io/api/v1/ev8cjfow1i90w"
+```
+
+This will generate + publish + sync to SheetDB in one run.
+
 ## Output
 - PDF files in `generated_pdfs/`
 - DOI state map in `tools/doi_state.json`

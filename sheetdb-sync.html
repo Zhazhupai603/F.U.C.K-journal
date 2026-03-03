@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SheetDB 同步 | F.U.C.K</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f8f9fa; color: #2c3e50; }
+  .wrap { max-width: 980px; margin: 40px auto; padding: 0 16px; }
+  .card { background: #fff; border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.08); padding: 22px; margin-bottom: 18px; }
+  h1 { font-size: 26px; margin-bottom: 10px; }
+  p { color: #566879; line-height: 1.65; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .btn { border: none; border-radius: 8px; background: #2c3e50; color: #fff; padding: 10px 14px; cursor: pointer; font-size: 14px; }
+  .btn:hover { background: #e74c3c; }
+  input { border: 1px solid #d4dde6; border-radius: 8px; padding: 10px 12px; font-size: 14px; min-width: 420px; }
+  .status { margin-top: 8px; font-size: 14px; }
+  .ok { color: #1b8a3a; }
+  .err { color: #c0392b; }
+  pre { margin-top: 10px; background: #0f1720; color: #dce6f0; border-radius: 8px; padding: 12px; overflow: auto; font-size: 12px; line-height: 1.55; max-height: 420px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>浏览器内同步到 SheetDB</h1>
+    <p>如果终端脚本被 Cloudflare 1010 拦截，浏览器内同步通常可用。这个页面会读取 <code>papers/papers.json</code> 并执行 upsert。</p>
+    <div class="row">
+      <input id="apiInput" value="https://sheetdb.io/api/v1/ev8cjfow1i90w" />
+      <button id="loadBtn" class="btn" type="button">1) 读取本地论文</button>
+      <button id="syncBtn" class="btn" type="button">2) 同步到 SheetDB</button>
+    </div>
+    <div id="status" class="status"></div>
+    <pre id="log"></pre>
+  </div>
+</div>
+
+<script>
+let rows = [];
+
+function byId(id) { return document.getElementById(id); }
+function api() { return byId("apiInput").value.trim().replace(/\/$/, ""); }
+
+function setStatus(ok, text) {
+  const node = byId("status");
+  node.className = `status ${ok ? "ok" : "err"}`;
+  node.textContent = text;
+}
+
+function log(text) {
+  const ts = new Date().toLocaleTimeString();
+  byId("log").textContent = `[${ts}] ${text}\n` + byId("log").textContent;
+}
+
+function normalizeRow(item) {
+  const id = String(item.id || "").trim();
+  const title = String(item.title || "").trim();
+  const pdfFile = String(item.pdfFile || "").trim();
+  if (!id || !title || !pdfFile) return null;
+  return {
+    id,
+    serial: String(item.serial || ""),
+    title,
+    doi: String(item.doi || id),
+    authors: String(item.authors || ""),
+    pdfFile,
+    coverImage: String(item.coverImage || ""),
+    date: String(item.date || ""),
+    volume: String(item.volume || ""),
+    abstract: String(item.abstract || ""),
+    keywords: Array.isArray(item.keywords) ? item.keywords.join(";") : String(item.keywords || ""),
+    downloads: String(item.downloads ?? 0)
+  };
+}
+
+async function loadLocalRows() {
+  const res = await fetch(`papers/papers.json?t=${Date.now()}`);
+  if (!res.ok) throw new Error(`读取本地 papers.json 失败: ${res.status}`);
+  const data = await res.json();
+  if (!Array.isArray(data)) throw new Error("papers.json 不是数组");
+  rows = data.map(normalizeRow).filter(Boolean);
+  if (!rows.length) throw new Error("没有有效论文行（需 id/title/pdfFile）");
+  setStatus(true, `已加载 ${rows.length} 条论文`);
+  log(`Loaded rows=${rows.length}`);
+}
+
+async function upsert(row) {
+  const payload = { data: row };
+  const endpoints = [
+    `${api()}/id/${encodeURIComponent(row.id)}`,
+    `${api()}/search?id=${encodeURIComponent(row.id)}`
+  ];
+
+  for (const endpoint of endpoints) {
+    for (const method of ["PATCH", "PUT"]) {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        log(`${method} ok ${row.id} -> ${endpoint}`);
+        return true;
+      }
+      log(`${method} fail ${row.id} -> ${endpoint} (${res.status})`);
+    }
+  }
+
+  const createRes = await fetch(api(), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if (createRes.ok) {
+    log(`POST ok ${row.id}`);
+    return true;
+  }
+
+  const text = await createRes.text();
+  log(`POST fail ${row.id} (${createRes.status}) body=${text.slice(0, 120)}`);
+  return false;
+}
+
+async function syncRows() {
+  if (!rows.length) throw new Error("请先点击“读取本地论文”");
+  let ok = 0;
+  for (const row of rows) {
+    if (await upsert(row)) ok += 1;
+  }
+  setStatus(ok === rows.length, `同步完成：${ok}/${rows.length} 成功`);
+}
+
+byId("loadBtn").addEventListener("click", async () => {
+  try {
+    await loadLocalRows();
+  } catch (e) {
+    setStatus(false, e.message || "加载失败");
+    log(`LOAD error: ${e.message || e}`);
+  }
+});
+
+byId("syncBtn").addEventListener("click", async () => {
+  try {
+    setStatus(true, "同步中...");
+    await syncRows();
+  } catch (e) {
+    setStatus(false, e.message || "同步失败");
+    log(`SYNC error: ${e.message || e}`);
+  }
+});
+
+setStatus(true, "先加载本地论文，再执行同步。");
+</script>
+</body>
+</html>

@@ -5,9 +5,13 @@ from __future__ import annotations
 
 import argparse
 import csv
+import difflib
+import io
 import json
 import re
 import shutil
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -19,9 +23,16 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import Flowable, Paragraph, SimpleDocTemplate, Spacer
+from reportlab.platypus import (
+    Flowable,
+    Image as RLImage,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+)
 
 
 BRAND_PRIMARY = colors.HexColor("#2c3e50")
@@ -53,6 +64,7 @@ class Submission:
     keywords_en: str
     docx_path: Path
     body_paragraphs: list[str]
+    images: list[bytes]
 
 
 @dataclass
@@ -190,19 +202,127 @@ def find_docx_path(row: dict[str, str], words_dir: Path) -> Path:
     )
 
 
-def extract_docx_body(docx_path: Path) -> list[str]:
+def is_front_matter_heading(title: str) -> bool:
+    low = title.strip().lower()
+    return low in {"摘要", "关键词", "abstract", "keywords"}
+
+
+def strip_duplicated_front_matter(
+    body: list[str],
+    abstract_zh: str,
+    keywords_zh: str,
+    title_zh: str,
+    authors: str,
+    affiliation: str,
+) -> list[str]:
+    abstract_norm = re.sub(r"\s+", "", abstract_zh)
+    _ = keywords_zh
+    filtered: list[str] = []
+    skip_section = False
+    text_line_index = 0
+    author_tokens = [
+        token.strip() for token in re.split(r"[，,、;；\s]+", authors) if token.strip()
+    ]
+
+    for line in body:
+        if line.startswith("## "):
+            heading = line[3:].strip()
+            skip_section = is_front_matter_heading(heading)
+            if not skip_section:
+                filtered.append(line)
+            continue
+
+        if skip_section:
+            continue
+
+        if line.startswith("[[IMAGE:"):
+            filtered.append(line)
+            continue
+
+        text_line_index += 1
+        stripped = line.strip()
+        compact = re.sub(r"\s+", "", line)
+        if re.match(
+            r"^[【\[]?\s*(关键词|key\s*words?)\s*[】\]]?\s*[:：]?",
+            line.strip(),
+            flags=re.IGNORECASE,
+        ):
+            continue
+
+        if text_line_index <= 20:
+            if stripped == title_zh.strip() or stripped == affiliation.strip():
+                continue
+            if stripped == authors.strip() or stripped in author_tokens:
+                continue
+            if re.match(r"^【?摘要】?", stripped):
+                continue
+            if re.match(r"^(作者|单位|机构)\s*[:：]", stripped):
+                continue
+
+        if abstract_norm and compact and len(compact) >= 20:
+            if compact in abstract_norm or abstract_norm in compact:
+                continue
+            similarity = difflib.SequenceMatcher(None, compact, abstract_norm).ratio()
+            if similarity >= 0.92:
+                continue
+            if text_line_index <= 20 and similarity >= 0.75:
+                continue
+
+        filtered.append(line)
+
+    original_text_lines = [
+        line
+        for line in body
+        if line and (not line.startswith("## ")) and (not line.startswith("[[IMAGE:"))
+    ]
+    filtered_text_lines = [
+        line
+        for line in filtered
+        if line and (not line.startswith("## ")) and (not line.startswith("[[IMAGE:"))
+    ]
+    if len(original_text_lines) >= 6 and len(filtered_text_lines) <= 2:
+        return body
+
+    return filtered
+
+
+def extract_docx_body_and_images(docx_path: Path) -> tuple[list[str], list[bytes]]:
     doc = Document(str(docx_path))
     body: list[str] = []
+    images: list[bytes] = []
+
     for p in doc.paragraphs:
         text = (p.text or "").strip()
         if not text:
-            continue
-        style_name = p.style.name if p.style and p.style.name else ""
-        if style_name.lower().startswith("heading"):
-            body.append(f"## {text}")
+            pass
         else:
-            body.append(text)
-    return body
+            style_name = p.style.name if p.style and p.style.name else ""
+            if style_name.lower().startswith("heading"):
+                body.append(f"## {text}")
+            else:
+                body.append(text)
+
+        for run in p.runs:
+            embeds = run._element.xpath(".//a:blip/@r:embed")
+            for rel_id in embeds:
+                part = doc.part.related_parts.get(rel_id)
+                if not part:
+                    continue
+                images.append(part.blob)
+                body.append(f"[[IMAGE:{len(images) - 1}]]")
+
+    return body, images
+
+
+def image_flowable(image_blob: bytes, max_width: float) -> RLImage:
+    bio = io.BytesIO(image_blob)
+    reader = ImageReader(bio)
+    width, height = reader.getSize()
+    flow = RLImage(io.BytesIO(image_blob))
+    scale = min(1.0, max_width / float(width))
+    flow.drawWidth = float(width) * scale
+    flow.drawHeight = float(height) * scale
+    return flow
 
 
 def slugify(text: str) -> str:
@@ -242,7 +362,11 @@ def ensure_catalog_entry(site_root: Path, paper: RenderedPaper) -> None:
     }
 
     existing_index = next(
-        (idx for idx, item in enumerate(catalog) if str(item.get("id", "")).strip() == paper.doi_id),
+        (
+            idx
+            for idx, item in enumerate(catalog)
+            if str(item.get("id", "")).strip() == paper.doi_id
+        ),
         -1,
     )
     if existing_index >= 0:
@@ -314,23 +438,118 @@ def publish_paper(site_root: Path, paper: RenderedPaper) -> None:
     ensure_home_list_html(site_root, paper)
 
 
+def sheetdb_request_json(
+    url: str, method: str = "GET", payload: dict[str, object] | None = None
+) -> tuple[int, str]:
+    data = None
+    headers = {"Content-Type": "application/json"}
+    if payload is not None:
+        data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    req = Request(url=url, method=method, data=data, headers=headers)
+    try:
+        with urlopen(req, timeout=20) as resp:
+            body = resp.read().decode("utf-8", errors="ignore")
+            return resp.status, body
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="ignore")
+        return exc.code, body
+    except URLError as exc:
+        return 0, str(exc)
+
+
+def normalize_sheetdb_row(item: dict[str, object]) -> dict[str, str]:
+    keywords_raw = item.get("keywords", "")
+    if isinstance(keywords_raw, list):
+        keywords = ";".join(str(v).strip() for v in keywords_raw)
+    else:
+        keywords = str(keywords_raw).strip()
+
+    return {
+        "id": str(item.get("id", "")).strip(),
+        "serial": str(item.get("serial", "")).strip(),
+        "title": str(item.get("title", "")).strip(),
+        "doi": str(item.get("doi", "")).strip(),
+        "authors": str(item.get("authors", "")).strip(),
+        "pdfFile": str(item.get("pdfFile", "")).strip(),
+        "coverImage": str(item.get("coverImage", "")).strip(),
+        "date": str(item.get("date", "")).strip(),
+        "volume": str(item.get("volume", "")).strip(),
+        "abstract": str(item.get("abstract", "")).strip(),
+        "keywords": keywords,
+        "downloads": str(item.get("downloads", "0")).strip() or "0",
+    }
+
+
+def sync_catalog_to_sheetdb(site_root: Path, api_url: str) -> tuple[int, int]:
+    catalog_path = site_root / "papers" / "papers.json"
+    if not catalog_path.exists():
+        return 0, 0
+
+    raw = json.loads(catalog_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
+        return 0, 0
+
+    rows = [
+        normalize_sheetdb_row(cast(dict[str, object], item))
+        for item in raw
+        if isinstance(item, dict)
+    ]
+    rows = [r for r in rows if r["id"] and r["title"] and r["pdfFile"]]
+
+    ok_count = 0
+    base = api_url.rstrip("/")
+    for row in rows:
+        row_id = row["id"]
+        payload: dict[str, object] = {"data": row}
+        updated = False
+        for endpoint in (f"{base}/id/{row_id}", f"{base}/search?id={row_id}"):
+            for method in ("PATCH", "PUT"):
+                code, _ = sheetdb_request_json(endpoint, method=method, payload=payload)
+                if 200 <= code < 300:
+                    updated = True
+                    break
+            if updated:
+                break
+        if not updated:
+            code, _ = sheetdb_request_json(base, method="POST", payload=payload)
+            if 200 <= code < 300:
+                updated = True
+        if updated:
+            ok_count += 1
+
+    return ok_count, len(rows)
+
+
 def to_submission(row: dict[str, str], words_dir: Path) -> Submission:
     docx_path = find_docx_path(row, words_dir)
-    body = extract_docx_body(docx_path)
+    body, images = extract_docx_body_and_images(docx_path)
+    title_zh = (row.get(HEADER_MAP["title_zh"]) or "").strip()
+    authors = (row.get(HEADER_MAP["authors"]) or "").strip()
+    affiliation = (row.get(HEADER_MAP["affiliation"]) or "").strip()
     keywords_zh = (row.get(HEADER_MAP["keywords_zh"]) or "").strip()
+    abstract_zh = (row.get(HEADER_MAP["abstract_zh"]) or "").strip()
+    body = strip_duplicated_front_matter(
+        body,
+        abstract_zh,
+        keywords_zh,
+        title_zh,
+        authors,
+        affiliation,
+    )
     return Submission(
         submission_id=(row.get(HEADER_MAP["submission_id"]) or "").strip(),
-        title_zh=(row.get(HEADER_MAP["title_zh"]) or "").strip(),
+        title_zh=title_zh,
         title_en=(row.get("英文标题") or "").strip(),
-        authors=(row.get(HEADER_MAP["authors"]) or "").strip(),
-        affiliation=(row.get(HEADER_MAP["affiliation"]) or "").strip(),
-        abstract_zh=(row.get(HEADER_MAP["abstract_zh"]) or "").strip(),
+        authors=authors,
+        affiliation=affiliation,
+        abstract_zh=abstract_zh,
         abstract_en=(row.get("英文摘要") or "").strip(),
         keywords_zh=keywords_zh,
         keywords=split_keywords(keywords_zh),
         keywords_en=(row.get("英文关键词") or "").strip(),
         docx_path=docx_path,
         body_paragraphs=body,
+        images=images,
     )
 
 
@@ -474,6 +693,15 @@ def render_pdf(submission: Submission, doi: str, out_file: Path) -> None:
     ]
 
     for line in submission.body_paragraphs:
+        if line.startswith("[[IMAGE:"):
+            match = re.match(r"\[\[IMAGE:(\d+)\]\]", line)
+            if match:
+                idx = int(match.group(1))
+                if 0 <= idx < len(submission.images):
+                    story.append(Spacer(1, 4 * mm))
+                    story.append(image_flowable(submission.images[idx], doc.width))
+                    story.append(Spacer(1, 4 * mm))
+            continue
         if line.startswith("## "):
             story.append(Paragraph(line[3:], styles["section"]))
         else:
@@ -535,6 +763,12 @@ def main() -> None:
         default=Path("."),
         help="Website root directory containing paper.html/index.html/papers/",
     )
+    parser.add_argument(
+        "--sheetdb-api",
+        type=str,
+        default="",
+        help="Optional SheetDB API URL for auto-sync after --publish",
+    )
     args = parser.parse_args()
 
     register_fonts()
@@ -569,6 +803,10 @@ def main() -> None:
         print(f"[OK] {submission.submission_id} -> {out_file}")
         if args.publish:
             print(f"[PUBLISH] {submission.submission_id} -> {published_file}")
+
+    if args.publish and args.sheetdb_api.strip():
+        ok, total = sync_catalog_to_sheetdb(args.site_root, args.sheetdb_api.strip())
+        print(f"[SHEETDB] Synced {ok}/{total} row(s)")
 
     print(f"Done. Generated {generated} PDF(s).")
 

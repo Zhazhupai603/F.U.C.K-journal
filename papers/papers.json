@@ -1,29 +1,12 @@
 [
   {
-    "id": "10.FUCK-2026.001",
-    "title": "基于摸鱼时长与咖啡摄入量的相关性研究",
-    "pdfFile": "10.FUCK-2026.001.pdf",
-    "coverImage": "assets/paper-covers/10.FUCK-2026.001.jpg"
-  },
-  {
-    "id": "10.FUCK-2026.002",
-    "title": "DDL截止前24小时论文完成质量研究",
-    "pdfFile": "10.FUCK-2026.002.pdf",
-    "coverImage": "assets/paper-covers/10.FUCK-2026.002.jpg"
-  },
-  {
-    "id": "10.FUCK-2026.003",
-    "title": "本科课程论文查重率与修改次数反比研究",
-    "pdfFile": "10.FUCK-2026.003.pdf",
-    "coverImage": "assets/paper-covers/10.FUCK-2026.003.jpg"
-  },
-  {
     "id": "10.FUCK-2026.004",
+    "serial": 1,
     "title": "微观经济学视角下的CSGO经济系统与玩家购买决策分析",
     "pdfFile": "10.FUCK-2026.004.pdf",
     "coverImage": "assets/paper-covers/10.FUCK-2026.004.jpg",
     "authors": "找钱狼，炸猪排",
-    "doi": "10.FUCK/2026.004",
+    "doi": "10.FUCK/2026.001",
     "date": "2026-03-03",
     "volume": "Vol. 1, Issue 2",
     "abstract": "CSGO（《反恐精英：全球攻势》）是一款团队竞技型的第一人称射击游戏，其核心玩法围绕两个对立团队——反恐精英（CT）和恐怖分子（T）之间的对抗。CSGO的经济系统是游戏策略的重要组成部分，它直接影响玩家的购买决策和团队战术的制定。从微观经济学的角度来看，CSGO的经济系统提供了一个研究个体在资源有限情况下如何做出最优决策的实验场。",
@@ -32,6 +15,48 @@
       "经济学"
     ],
     "affiliation": "国际关系与公共事务学院",
+    "titleEn": "",
+    "abstractEn": "",
+    "keywordsEn": ""
+  },
+  {
+    "id": "10.FUCK-2026.006",
+    "title": "胶原蛋白与可吸收手术缝合线",
+    "pdfFile": "10.FUCK-2026.006.pdf",
+    "coverImage": "assets/paper-covers/10.FUCK-2026.006.jpg",
+    "authors": "珍珠泡",
+    "doi": "10.FUCK/2026.006",
+    "date": "2026-03-03",
+    "volume": "Vol. 1, Issue 2",
+    "abstract": "本文简单介绍了胶原蛋白的结构和分类，讨论了胶原蛋白作为生物高分子材料在可吸收手术缝合线中的应用。胶原蛋白因其生物相容性、生物降解性、力学性质、低免疫原性和止血性等优势，被认为是理想的缝合线材料。并通过发布问卷调查，小样本的统计了人们对胶原蛋白缝合线的认知度，并对普及其认知度提出自己的建议。最后讨论了胶原蛋白缝合线的前景发展并相信随着技术的发展，胶原蛋白缝合线有望在医疗领域发挥更大的作用，提高人们的生活质量。",
+    "keywords": [
+      "胶原蛋白",
+      "可吸收手术缝合线",
+      "生物高分子材料"
+    ],
+    "affiliation": "临床医学院",
+    "titleEn": "",
+    "abstractEn": "",
+    "keywordsEn": ""
+  },
+  {
+    "id": "10.FUCK-2026.007",
+    "title": "微创外科学的发展与革新：以宫腔镜子宫肌瘤切除术为例",
+    "pdfFile": "10.FUCK-2026.007.pdf",
+    "coverImage": "assets/paper-covers/10.FUCK-2026.007.jpg",
+    "authors": "辣椒味",
+    "doi": "10.FUCK/2026.007",
+    "date": "2026-03-03",
+    "volume": "Vol. 1, Issue 2",
+    "abstract": "微创外科学在20世纪70年代兴起，宫腔镜技术作为其重要分支，近年来在妇科诊断和治疗领域得到了广泛应用，尤其在子宫平滑肌瘤的诊治中发挥了重要作用。本文回顾了宫腔镜技术的发展历程，总结了冷刀技术、碎裂器技术、组织移除系统及人工智能在宫腔镜下子宫平滑肌瘤切除术中的最新进展，并探讨了门诊与住院手术的技术特点及其适应症。文章强调了宫腔镜技术的高效性和安全性，展望了未来在精准手术和患者管理方面的潜在发展方向。\r\nMinimally invasive surgery emerged in the 1970s， and hysteroscopic techniques， as a critical branch， have been widely applied in gynecological diagnosis and treatment， particularly in the management of uterine leiomyomas. This paper reviews the developmental history of hysteroscopic technology， summarizes advancements in cold-knife techniques， morcellator technology， tissue removal systems， and artificial intelligence in hysteroscopic myomectomy. It also discusses the technical features and indications of outpatient and inpatient surgeries. The article highlights the efficiency and safety of hysteroscopic techniques and envisions future advancements in precision surgery and patient management.",
+    "keywords": [
+      "微创外科学",
+      "宫腔镜技术",
+      "子宫平滑肌瘤",
+      "冷刀技术",
+      "组织移除系统"
+    ],
+    "affiliation": "基础医学院",
     "titleEn": "",
     "abstractEn": "",
     "keywordsEn": ""
